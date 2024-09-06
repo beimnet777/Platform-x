@@ -1,9 +1,9 @@
 const sequelize = require('../config/database');
-const OrganizationWorker = require('../db/models/organizationworker');
-const Organization = require('../db/models/organization');
+const OrganizationWorker = require('../db/models/user/organizationworker');
+const Organization = require('../db/models/user/organization');
 const catchAsyncError = require('../utils/catchAsyncError');
 const argon2 = require("argon2")
-const user = require('../db/models/user');
+const user = require('../db/models/user/user');
 const { response } = require('express');
 
 
@@ -27,12 +27,13 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
       },{ transaction :t })
       let userId =newUser.id
       const organizationObject = await Organization.findOne({where: { createdBy: req.user.id }});
+      const organizationId = organizationObject.dataValues.id
 
       
     // Create the new organization worker
     const organizationWorker = await OrganizationWorker.create({
       userId,
-      organizationId: 3,
+      organizationId,
       jobTitle,
       jobDescription
     }, {transaction: t});

@@ -1,6 +1,6 @@
 'use strict';
 
-const sequelize = require("../../config/database");
+const sequelize = require("../../../config/database");
 const { Model, Sequelize, DataTypes }  = require('sequelize');
 
 const organizationWorker = sequelize.define('organizationWorker',{
@@ -48,7 +48,7 @@ const organizationWorker = sequelize.define('organizationWorker',{
 },{
   paranoid: true,
   freezeTableName: true,
-  modelName: 'user',
+  modelName: 'organizationWorker',
 } )
 
 

@@ -1,7 +1,7 @@
 const jwt = require ("jsonwebtoken")
 const AppError = require("../utils/appError")
 const catchAsyncError = require("../utils/catchAsyncError");
-const user = require("../db/models/user");
+const user = require("../db/models/user/user");
 
 
 const authentication = catchAsyncError(async (req,res,next) =>{
@@ -10,7 +10,6 @@ const authentication = catchAsyncError(async (req,res,next) =>{
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
     idToken = req.headers.authorization.split(' ')[1]
     }
-    console.log(idToken)
     
 
     if (!idToken){return next(new AppError("You are not logged in", 401))}
@@ -18,6 +17,7 @@ const authentication = catchAsyncError(async (req,res,next) =>{
     // token verification
 
     const details= jwt.verify(idToken, process.env.JWT_SECRET_KEY)
+    console.log(details.id)
     const loggedUser  = await user.findByPk(details.id)
 
     if (!loggedUser){
@@ -34,7 +34,6 @@ const authentication = catchAsyncError(async (req,res,next) =>{
 
 const restrictTo = (...userType) => {
     const checkPermission = (req, res, next) => {
-        console.log(req.user.userType)
         if (!userType.includes(req.user.userType)) {
             return next(
                 new AppError(

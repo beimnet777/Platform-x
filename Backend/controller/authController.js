@@ -1,6 +1,6 @@
-const user = require('../db/models/user')
-const agent = require('../db/models/agent')
-const organization = require('../db/models/organization')
+const user = require('../db/models/user/user')
+const agent = require('../db/models/user/agent')
+const organization = require('../db/models/user/organization')
 const sequelize  = require ('../config/database')
 
 const argon2 = require("argon2")

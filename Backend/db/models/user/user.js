@@ -1,5 +1,5 @@
 'use strict';
-const sequelize = require('../../config/database')
+const sequelize = require('../../../config/database')
 const { Model, Sequelize, DataTypes }  = require('sequelize');
 const agent = require('./agent');
 const organization = require('./organization');

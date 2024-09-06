@@ -1,8 +1,9 @@
 'use strict';
-const sequelize = require("../../config/database");
+const sequelize = require("../../../config/database");
 const { Model, Sequelize, DataTypes }  = require('sequelize');
 const user = require("./user");
 const organizationWorker = require("./organizationworker");
+const form = require("../form/form");
 
 const organization = sequelize.define('organization',{
   id: {
@@ -45,11 +46,13 @@ const organization = sequelize.define('organization',{
 },{
   paranoid: true,
   freezeTableName: true,
-  modelName: 'user',
+  modelName: 'organization',
 } )
 
 organization.hasMany(organizationWorker, {foreignKey:"organizationId"})
 organizationWorker.belongsTo(organization,{foreignKey:"organizationId"})
 
+organization.hasMany(form,{foreignKey:"organizationId"})
+form.belongsTo(organization,{foreignKey:"organizationId"})
 
 module.exports = organization

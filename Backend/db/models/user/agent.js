@@ -1,7 +1,8 @@
 'use strict';
 
-const sequelize = require("../../config/database");
+const sequelize = require("../../../config/database");
 const { Model, Sequelize, DataTypes }  = require('sequelize');
+const response = require("../response/response");
 
 const agent = sequelize.define('agent',{
   id: {
@@ -60,7 +61,10 @@ const agent = sequelize.define('agent',{
 },{
   paranoid: true,
   freezeTableName: true,
-  modelName: 'user',
+  modelName: 'agent',
 })
+
+agent.hasMany(response,{foreignKey:'agentId'})
+response.belongsTo(agent,{foreignKey: 'agentId'})
 
 module.exports = agent
