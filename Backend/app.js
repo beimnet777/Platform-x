@@ -1,4 +1,5 @@
 require('dotenv').config({ path: `${process.cwd()}/.env`})
+const path = require('path')
 const express = require ('express')
 const app = express()
 
@@ -9,12 +10,16 @@ const AppError = require ('./utils/appError')
 const authRouter = require('./routes/authRoutes')
 const orgAdminRouter = require('./routes/orgAdminRoutes')
 const agentRouter = require ('./routes/agentRoutes')
+const superAdminRouter = require('./routes/superAdminRoutes')
 
 app.use(express.json())
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/orgAdmin', orgAdminRouter)
 app.use('/api/v1/agent', agentRouter)
+app.use('/api/v1/superAdmin', superAdminRouter)
 
 
 

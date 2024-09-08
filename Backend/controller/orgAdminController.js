@@ -4,7 +4,11 @@ const Organization = require('../db/models/user/organization');
 const catchAsyncError = require('../utils/catchAsyncError');
 const argon2 = require("argon2")
 const user = require('../db/models/user/user');
-const { response } = require('express');
+const form = require('../db/models/form/form');
+const organization = require('../db/models/user/organization');
+const response = require('../db/models/response/response');
+const responseDetail = require('../db/models/response/responsedetail');
+const { Op } = require('sequelize');
 
 
 const createOrgMember  = catchAsyncError( async (req, res) => {
@@ -47,4 +51,128 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
 
     return res.status(201).json(response) })
 
-module.exports = createOrgMember
+
+
+    
+
+  const getFormsByOrganization = catchAsyncError (async (req, res) => {
+    const { page = 1, limit = 10 } = req.query; // default pagination values
+    const offset = (page - 1) * limit;
+  
+    const organizationObject = await organization.findOne({where: { createdBy: req.user.id }})
+    const organizationId = organizationObject.dataValues.id
+
+      const forms = await form.findAndCountAll({
+        where: { organizationId: organizationId },
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+      });
+  
+      const totalPages = Math.ceil(forms.count / limit);
+  
+      // Generate next and previous page URLs
+      const nextPage =
+        page < totalPages
+          ? `${req.protocol}://${req.get('host')}${req.path}?page=${parseInt(page) + 1}&limit=${limit}`
+          : null;
+  
+      const prevPage =
+        page > 1
+          ? `${req.protocol}://${req.get('host')}${req.path}?page=${parseInt(page) - 1}&limit=${limit}`
+          : null;
+  
+      return res.json({
+        totalForms: forms.count,
+        totalPages,
+        currentPage: parseInt(page),
+        forms: forms.rows,
+        nextPage,
+        prevPage,
+      });
+    
+  });
+
+
+  const getResponsesByForm = catchAsyncError (async (req, res) => {
+    const { formId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+  
+    
+      const responses = await response.findAndCountAll({
+        where: { formId: formId },
+        include: [{ model: responseDetail }],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+      });
+  
+      const totalPages = Math.ceil(responses.count / limit);
+  
+      // Generate next and previous page URLs
+      const nextPage =
+        page < totalPages
+          ? `${req.protocol}://${req.get('host')}${req.path}?page=${parseInt(page) + 1}&limit=${limit}`
+          : null;
+  
+      const prevPage =
+        page > 1
+          ? `${req.protocol}://${req.get('host')}${req.path}?page=${parseInt(page) - 1}&limit=${limit}`
+          : null;
+  
+      return res.json({
+        totalResponses: responses.count,
+        totalPages,
+        currentPage: parseInt(page),
+        responses: responses.rows,
+        nextPage,
+        prevPage,
+      });
+    
+  });
+
+
+  const getResponseStatsByForm = catchAsyncError(async (req, res) => {
+    const { formId } = req.params;
+    const { startDate, endDate } = req.query;
+  
+      const responseCount = await response.count({
+        where: {
+          formId: formId,
+          createdAt: {
+            [Op.between]: [new Date(startDate), new Date(endDate)],
+          },
+        },
+      });
+  
+      return res.json({ responseCount });
+    
+  });
+
+
+  const getResponseStatsByOrganization = catchAsyncError(async (req, res) => {
+    const { startDate, endDate } = req.query;
+
+
+    const organizationObject = await organization.findOne({where: { createdBy: req.user.id }})
+    const organizationId = organizationObject.dataValues.id
+  
+      const responseCount = await response.count({
+        where: {
+          createdAt: {
+            [Op.between]: [new Date(startDate), new Date(endDate)],
+          },
+        },
+        include: [{
+          model: form,
+          where: { organizationId: organizationId },
+        }],
+      });
+  
+      return res.json({ responseCount });
+  });
+  
+  
+  
+    
+
+module.exports = { createOrgMember, getFormsByOrganization, getResponsesByForm, getResponseStatsByForm, getResponseStatsByOrganization}

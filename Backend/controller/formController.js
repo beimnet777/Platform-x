@@ -78,6 +78,14 @@ const submitForm =catchAsyncError( async (req, res) => {
   
     const { formId, answers } = req.body;
 
+    const agentObject = await agent.findOne({where: { userId: req.user.id }})
+    if (!agentObject){
+      return res.status(404).json({
+        message : "agent is not found"
+      })
+    }
+    const agentId = agentObject.dataValues.id
+
     
     // form exists?
     const formRecord = await form.findOne({ where: { id: formId } });
@@ -86,7 +94,7 @@ const submitForm =catchAsyncError( async (req, res) => {
     }
 
     // already responded
-    const existingResponse = await response.findOne({ where: { formId, agentID: agentId } });
+    const existingResponse = await response.findOne({ where: { formId, agentId: agentId } });
     if (existingResponse) {
       return res.status(400).json({ message: 'You have already submitted this form' });
     }
@@ -95,8 +103,6 @@ const submitForm =catchAsyncError( async (req, res) => {
         return res.status(400).json({ message: 'This form has reached its response limit or it is closed' });
       }
 
-    const agentObject = await agent.findOne({where: { userId: req.user.id }})
-    const agentId = agentObject.dataValues.id
 
     const t = await sequelize.transaction()
 
@@ -161,5 +167,29 @@ const submitForm =catchAsyncError( async (req, res) => {
   
 });
 
+const getFormQuestions  = catchAsyncError( async (req, res) => {
+  const { formId } = req.params;
 
-module.exports = { createForm ,submitForm};
+      // Find the form by its ID, including its related questions
+      const formWithQuestions = await form.findOne({
+          where: { id: formId },
+          include: [{
+              model: question,
+              attributes: ['id', 'questionTitle', 'questionDescription', 'questionType'] // Adjust attributes based on your question model
+          }]
+      });
+
+      // If no form is found, return 404
+      if (!formWithQuestions) {
+          return res.status(404).json({ message: "Form not found" });
+      }
+
+      // Return the questions
+      res.status(200).json({
+          formId: formWithQuestions.id,
+          formName: formWithQuestions.formName,
+          questions: formWithQuestions.questions
+      });
+});
+
+module.exports = { createForm ,submitForm, getFormQuestions};

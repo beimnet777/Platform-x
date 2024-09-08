@@ -34,6 +34,7 @@ const authentication = catchAsyncError(async (req,res,next) =>{
 
 const restrictTo = (...userType) => {
     const checkPermission = (req, res, next) => {
+        console.log(req.user.userType, "************", userType)
         if (!userType.includes(req.user.userType)) {
             return next(
                 new AppError(

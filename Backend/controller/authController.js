@@ -43,11 +43,13 @@ const signup = catchAsyncError( async (req,res,next) =>{
         gender,
         age
     },{ transaction: t });}
-    else if (userType === 'OrgAdmin') {
+    else if (userType === 'OrgAdmin' ) {
+        let approved = true ? userType==='SuperAdmin' : false
         relatedData = await organization.create({
             organizationName,
             organizationDescription,
             createdBy: newUser.id,
+
         },{ transaction: t });
     }
 
@@ -64,14 +66,17 @@ const response = {
       userType: newUser.userType,
       ...(userType === 'Agent' && {
         agent: {
+            id: relatedData.id,
           gender: relatedData.gender,
           age: relatedData.age,
           currentBalance: relatedData.currentBalance,
           approved: relatedData.approved
+          
         }
       }),
       ...(userType === 'OrgAdmin' && {
         organization: {
+            id: relatedData.id,
           organizationName: relatedData.organizationName,
           organizationDescription: relatedData.organizationDescription,
           approved: relatedData.approved
