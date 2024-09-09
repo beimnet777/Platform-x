@@ -8,7 +8,8 @@ const form = require('../db/models/form/form');
 const organization = require('../db/models/user/organization');
 const response = require('../db/models/response/response');
 const responseDetail = require('../db/models/response/responsedetail');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
+const question = require('../db/models/form/question');
 
 
 const createOrgMember  = catchAsyncError( async (req, res) => {
@@ -171,8 +172,43 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
       return res.json({ responseCount });
   });
   
+
+  const validateResponse  = catchAsyncError(
+    async (req,res,next) =>{
+      const responseId  = req.params.responseId
+
+      const fetchedResponse  = await response.findOne( {where : { id: responseId}})
+
+      if (!fetchedResponse){
+        res.status(404).json(" response can't be found ")
+      }
+      fetchedResponse.isValid = true
+      fetchedResponse.save()
+
+      res.json({
+        status : "success",
+        message : "response validated successfuly"
+      })
+
+
+    }
+  )
+
+  const getFormQuestions = catchAsyncError (
+    async (req,res,next) =>{
+      const formId = req.params.formId
+
+      const questions  = await question.findAll({where : {formId}})
+
+      if (questions.length === 0){
+        return res.status(404).json( " couldn't find questions associated with this form" )
+      }
+
+      res.json(questions)
+    }
+  )
   
   
     
 
-module.exports = { createOrgMember, getFormsByOrganization, getResponsesByForm, getResponseStatsByForm, getResponseStatsByOrganization}
+module.exports = { createOrgMember, getFormsByOrganization, getResponsesByForm, getResponseStatsByForm, getResponseStatsByOrganization, validateResponse, getFormQuestions}

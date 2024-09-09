@@ -88,7 +88,8 @@ const response = {
     
 
   response.token = generateToken({
-        id: response.id
+        id: response.id,
+        role : userType
     }) 
     res.json({
         status: 'success',
@@ -111,7 +112,8 @@ const login =catchAsyncError( async (req, res, next) =>{
     }
 
     const token = result.token = generateToken({
-        id: result.id
+        id: result.id,
+        role : result.userType
     })
 
     return res.json({
