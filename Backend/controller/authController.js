@@ -7,6 +7,8 @@ const argon2 = require("argon2")
 const jwt = require ("jsonwebtoken")
 const AppError = require("../utils/appError")
 const catchAsyncError = require("../utils/catchAsyncError")
+const organizationWorker = require('../db/models/user/organizationworker')
+const { response } = require('express')
 
 const generateToken = (payLoad) =>{
     return jwt.sign(payLoad, process.env.JWT_SECRET_KEY,{
@@ -147,5 +149,32 @@ const changePassword = catchAsyncError(
     })
 
 
+const getProfile = catchAsyncError (
+    async (req,res, next) => {
+        const userId = req.user.id
+        const userObject = await user.findOne({where: { id : userId}})
 
-module.exports = { signup, login, changePassword}
+        if (!userObject){
+            res.status(404).json({
+                status : "failed",
+                message : "couldn't find user"
+            })
+        }
+
+        let relatedObject
+        if (userObject.userType == "Agent"){
+            relatedObject = agent.findOne({where: {userId}})
+        }
+        else if (userObject.userType == "OrgMember"){
+            relatedObject = organizationWorker.findOne({where: {userId}})
+        }
+        else if (userObject.userType == "OrgAdmin"){
+            relatedObject = organization.findOne({where: {createdBy : userId}})
+        }
+
+        response = { userInfo : userObject, relatedProfile : relatedObject}
+        res.json(response)
+        }
+)
+
+module.exports = { signup, login, changePassword, getProfile}
