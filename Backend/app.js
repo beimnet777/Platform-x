@@ -6,11 +6,16 @@ const app = express()
 const globalErrorHandler = require('./controller/errorController')
 const catchAsyncError = require('./utils/catchAsyncError')
 const AppError = require ('./utils/appError')
+//logger
+const { requestLogger, errorLogger } = require('./middleware/logger');
 // Routers
 const authRouter = require('./routes/authRoutes')
 const orgAdminRouter = require('./routes/orgAdminRoutes')
 const agentRouter = require ('./routes/agentRoutes')
 const superAdminRouter = require('./routes/superAdminRoutes')
+
+// middleware to log all incoming requests
+app.use(requestLogger);
 
 app.use(express.json())
 
@@ -29,6 +34,8 @@ app.use(
         throw new AppError(`Can't find ${req.originalUrl} on this server`, 404);
     })
 );
+
+app.use(errorLogger)
 // global error handler
 app.use(globalErrorHandler)
 

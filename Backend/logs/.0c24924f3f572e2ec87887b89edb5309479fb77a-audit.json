@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\.0c24924f3f572e2ec87887b89edb5309479fb77a-audit.json",
+    "files": [
+        {
+            "date": 1725880466908,
+            "name": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\error-2024-09-09.log",
+            "hash": "c78d0b583ab19432899eeec82dffeda082f33fea7dccd3d004af37891bf01bfc"
+        }
+    ],
+    "hashType": "sha256"
+}
