@@ -2,6 +2,7 @@ require('dotenv').config({ path: `${process.cwd()}/.env`})
 const path = require('path')
 const express = require ('express')
 const app = express()
+const cors = require('cors');
 
 const globalErrorHandler = require('./controller/errorController')
 const catchAsyncError = require('./utils/catchAsyncError')
@@ -14,6 +15,8 @@ const orgAdminRouter = require('./routes/orgAdminRoutes')
 const agentRouter = require ('./routes/agentRoutes')
 const superAdminRouter = require('./routes/superAdminRoutes')
 
+
+app.use(cors())
 // middleware to log all incoming requests
 app.use(requestLogger);
 
