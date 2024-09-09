@@ -95,5 +95,51 @@ const approveOrganization = catchAsyncError( async (req, res) => {
 
 
 
+    // Controller function to fetch unapproved organizations
+    const getUnapprovedOrganizations =  catchAsyncError(async (req, res) => {
+      
+      const page = parseInt(req.query.page) || 1; // Default page is 1
+      const limit = parseInt(req.query.limit) || 10  
+      const offset = (page-1)* limit
 
-module.exports  = {createOrganization, approveOrganization, approveAgent}
+      const unapprovedOrganizations = await organization.findAll({
+          where: { approved: false },
+          limit: limit,
+          offset: offset
+        });
+        
+
+        if (unapprovedOrganizations.length === 0) {
+          return res.status(404).json({ message: "No unapproved organizations found." });
+        }
+    
+        return res.status(200).json(unapprovedOrganizations);
+      
+    });
+
+     // Controller function to fetch unapproved organizations
+     const getUnapprovedAgents =  catchAsyncError(async (req, res) => {
+
+      const page = parseInt(req.query.page) || 1; // Default page is 1
+      const limit = parseInt(req.query.limit) || 10  
+      const offset = (page-1)* limit
+      
+      const unapprovedAgents = await agent.findAll({
+        where: { approved: false },
+        limit: limit,
+        offset : offset
+      });
+  
+      if (unapprovedAgents.length === 0) {
+        return res.status(404).json({ message: "No unapproved organizations found." });
+      }
+  
+      return res.status(200).json(unapprovedAgents);
+    
+  });
+    
+    
+    
+
+
+module.exports  = {createOrganization, approveOrganization, approveAgent, getUnapprovedOrganizations,getUnapprovedAgents}
