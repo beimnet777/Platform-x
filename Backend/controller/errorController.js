@@ -26,10 +26,7 @@ const sendErrorProd = (err, res) =>{
         })
     }
 
-    res.status(statusCode).json({
-        status: "error",
-        message: message,
-    })
+    res.status(statusCode).json(err)
 }
 
 const globalErrorHandler = (err,req,res,next) =>{
