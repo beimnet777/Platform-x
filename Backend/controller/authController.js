@@ -99,7 +99,7 @@ response.token = token
     })
 })
 
-const login =catchAsyncError( async (req, res, next) =>{
+const login = catchAsyncError( async (req, res, next) =>{
     const {email, password} = req.body
 
     if (!email || !password ){
@@ -123,6 +123,29 @@ const login =catchAsyncError( async (req, res, next) =>{
     })
 })
 
+const changePassword = catchAsyncError(
+    async (req, res, next) =>{
+        const userId = req.user.id
+
+        const userObject = await user.findOne({where:{id:userId}})
+
+        if (!req.body.newPassword){
+            res.status(404).json(" new password is not provided")
+        }
+        if( !userObject){
+            res.status(404).json("user can't be found")
+        }
+
+        const newPasswordHash = await argon2.hash(req.body.newPassword)
+        userObject.passwordHash = newPasswordHash
+        userObject.save()
+
+        res.json({
+            status : "success",
+            message : "password updated successfuly"
+        })
+    })
 
 
-module.exports = { signup ,login}
+
+module.exports = { signup, login, changePassword}
