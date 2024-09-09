@@ -36,7 +36,6 @@ const signup = catchAsyncError( async (req,res,next) =>{
       },{ transaction: t });
 
     let relatedData;
-    let message;
     if (userType === 'Agent') {
     relatedData = await agent.create({
         userId: newUser.id,   
@@ -87,10 +86,12 @@ const response = {
 
     
 
-  response.token = generateToken({
-        id: response.id,
-        role : userType
-    }) 
+  const token = generateToken({
+    id: newUser.id,
+    role : newUser.userType
+})
+
+response.token = token
     res.json({
         status: 'success',
         data : response,
