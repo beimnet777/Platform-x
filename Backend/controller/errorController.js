@@ -28,7 +28,7 @@ const sendErrorProd = (err, res) =>{
 
     res.status(statusCode).json({
         status: "error",
-        message: "Opps something went wrong",
+        message: message,
     })
 }
 
