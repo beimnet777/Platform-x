@@ -163,16 +163,15 @@ const getProfile = catchAsyncError (
 
         let relatedObject
         if (userObject.userType == "Agent"){
-            relatedObject = agent.findOne({where: {userId}})
+            relatedObject = await agent.findOne({where: {userId}})
         }
         else if (userObject.userType == "OrgMember"){
-            relatedObject = organizationWorker.findOne({where: {userId}})
+            relatedObject = await organizationWorker.findOne({where: {userId}})
         }
         else if (userObject.userType == "OrgAdmin"){
-            relatedObject = organization.findOne({where: {createdBy : userId}})
+            relatedObject = await organization.findOne({where: {createdBy : userId}})
         }
-
-        response = { userInfo : userObject, relatedProfile : relatedObject}
+        const response = { userInfo : userObject, relatedObject}
         res.json(response)
         }
 )
