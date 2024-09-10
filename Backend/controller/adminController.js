@@ -105,7 +105,8 @@ const approveOrganization = catchAsyncError( async (req, res) => {
       const unapprovedOrganizations = await organization.findAll({
           where: { approved: false },
           limit: limit,
-          offset: offset
+          offset: offset,
+          order: [['createdAt', 'DESC']]
         });
         
 
@@ -127,7 +128,8 @@ const approveOrganization = catchAsyncError( async (req, res) => {
       const unapprovedAgents = await agent.findAll({
         where: { approved: false },
         limit: limit,
-        offset : offset
+        offset : offset,
+        order: [['createdAt', 'DESC']]
       });
   
       if (unapprovedAgents.length === 0) {

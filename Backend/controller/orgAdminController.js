@@ -67,6 +67,7 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
         where: { organizationId: organizationId },
         limit: parseInt(limit),
         offset: parseInt(offset),
+        order: [['createdAt', 'DESC']]
       });
   
       const totalPages = Math.ceil(forms.count / limit);
@@ -105,6 +106,7 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
         include: [{ model: responseDetail }],
         limit: parseInt(limit),
         offset: parseInt(offset),
+        order: [['createdAt', 'DESC']]
       });
   
       const totalPages = Math.ceil(responses.count / limit);

@@ -176,7 +176,8 @@ const getFormQuestions  = catchAsyncError( async (req, res) => {
           include: [{
               model: question,
               attributes: ['id', 'questionTitle', 'questionDescription', 'questionType'] // Adjust attributes based on your question model
-          }]
+          }],
+          order : [['createdAt', 'DESC']]
       });
 
       // If no form is found, return 404

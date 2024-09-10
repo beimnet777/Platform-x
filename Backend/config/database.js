@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 const env = process.env.NODE_ENV || 'development';
 const config = require('./config.js')[env];
 
-
+// Check if DATABASE_URL is set, otherwise fallback to config object
 const sequelize = process.env.DATABASE_URL
   ? new Sequelize(process.env.DATABASE_URL, {
       dialect: 'postgres',
