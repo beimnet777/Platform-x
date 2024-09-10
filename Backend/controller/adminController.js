@@ -10,7 +10,7 @@ const agent = require("../db/models/user/agent");
 // create organization
 const createOrganization = catchAsyncError( async (req,res,next) =>{
 
-    const { userName, email, password, firstName, lastName, userType, organizationName, organizationDescription } = req.body;
+    const {  email, password, firstName, lastName, userType, organizationName, organizationDescription } = req.body;
 
     const passwordHash = await argon2.hash(password)
     let newUser;
@@ -18,7 +18,6 @@ const createOrganization = catchAsyncError( async (req,res,next) =>{
     const t = await sequelize.transaction();
 
     newUser = await user.create({
-        userName,
         email,
         passwordHash,
         firstName,
@@ -44,7 +43,6 @@ const createOrganization = catchAsyncError( async (req,res,next) =>{
     const response = {
     user: {
       id: newUser.id,
-      adminUserName: newUser.userName,
       adminEmail: newUser.email,
       adminFirstName: newUser.firstName,
       adminLastName: newUser.lastName,
@@ -152,7 +150,11 @@ const approveOrganization = catchAsyncError( async (req, res) => {
     const organizations = await organization.findAll({
         limit: limit,
         offset: offset,
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        include: [{
+          model: user,         // Join with the 'user' model
+          attributes: ['id', 'email', 'firstName', 'lastName'],  // Include specific fields from the user model
+        }]
       });
       
 
@@ -174,7 +176,11 @@ const approveOrganization = catchAsyncError( async (req, res) => {
     const agents = await agent.findAll({
       limit: limit,
       offset : offset,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      include: [{
+        model: user,         // Join with the 'user' model
+        attributes: ['id', 'email', 'firstName', 'lastName'],  // Include specific fields from the user model
+      }]
     });
 
     if (agents.length === 0) {

@@ -73,6 +73,103 @@ const createForm = catchAsyncError( async (req, res) => {
 
 
 
+// *************************************
+
+const updateForm =  catchAsyncError(async (req, res) => {
+  const { formId } = req.params;
+  const {
+    formName,
+    organizationId,
+    formDescription,
+    isOpen,
+    minAgentAge,
+    maxAgentAge,
+    agentGender,
+    numberOfQuestion, // Ensure this is included
+    totalResponse,    // Ensure this is included
+    currentResponse,  // Ensure this is included
+    questions // Array of questions (each question may or may not contain an id)
+  } = req.body;
+
+  const t = await sequelize.transaction();
+    // First, update the form details
+    const updatedForm = await form.update({
+      formName,
+      organizationId,
+      formDescription,
+      isOpen,
+      numberOfQuestion,   // Update number of questions
+      totalResponse,      // Update total response
+      currentResponse,    // Update current response
+      minAgentAge,
+      maxAgentAge,
+      agentGender,
+      updatedAt: new Date() // Update timestamp
+    }, {
+      where: { id: formId },
+      returning: true,  // Returns updated form data
+      transaction: t
+    });
+
+    if (updatedForm[0] === 0) { // Check if the form exists and was updated
+      throw new Error("Form not found or no updates were made");
+    }
+
+    const formInstance = updatedForm[1][0]; // Get the updated form instance
+
+    // Update existing questions and create new ones
+    let updatedQuestions = [];
+    for (const q of questions) {
+      if (q.id) {
+        // If the question has an ID, update the existing question
+        const updatedQuestion = await question.update({
+          questionTitle: q.questionTitle,
+          questionDescription: q.questionDescription,
+          questionType: q.questionType,
+          updatedAt: new Date() // Update timestamp for question
+        }, {
+          where: { id: q.id, formId: formId },
+          returning: true,
+          transaction: t
+        });
+
+        if (updatedQuestion[0] === 0) { // If no question was found or updated
+          throw new Error(`Question with id ${q.id} not found for this form`);
+        }
+
+        updatedQuestions.push(updatedQuestion[1][0]); // Add updated question to array
+      } else {
+        // If no ID, create a new question and associate it with the form
+        const newQuestion = await question.create({
+          formId: formId,
+          questionTitle: q.questionTitle,
+          questionDescription: q.questionDescription,
+          questionType: q.questionType,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }, { transaction: t });
+
+        updatedQuestions.push(newQuestion); // Add newly created question to array
+      }
+    }
+
+    // Commit the transaction if everything goes well
+    await t.commit();
+
+    // Send the updated form and questions as the response
+    res.status(200).json({
+      message: 'Form and questions updated successfully',
+      form: formInstance,
+      updatedQuestions
+    });
+});
+
+
+
+// *************************************
+
+
+
 
 const submitForm =catchAsyncError( async (req, res) => {
   
@@ -193,4 +290,4 @@ const getFormQuestions  = catchAsyncError( async (req, res) => {
       });
 });
 
-module.exports = { createForm ,submitForm, getFormQuestions};
+module.exports = { createForm ,submitForm, getFormQuestions, updateForm};

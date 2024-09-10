@@ -19,6 +19,7 @@ const getAgentFormsFeed = catchAsyncError ( async (req, res) => {
         }
 
         const { gender, age } = agentObject;
+        console.log(gender, age)
 
         // Fetch forms that match agent profile and are open
         const forms = await form.findAndCountAll({

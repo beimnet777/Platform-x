@@ -10,11 +10,12 @@ const response = require('../db/models/response/response');
 const responseDetail = require('../db/models/response/responsedetail');
 const { Op, where } = require('sequelize');
 const question = require('../db/models/form/question');
+const organizationWorker = require('../db/models/user/organizationworker');
 
 
 const createOrgMember  = catchAsyncError( async (req, res) => {
  
-    const { userName, email, password, firstName, lastName, userType, jobTitle, jobDescription } = req.body;
+    const { email, password, firstName, lastName, userType, jobTitle, jobDescription } = req.body;
 
     // Validate required fields
     if ( !jobTitle || !jobDescription) {
@@ -23,7 +24,6 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
     const passwordHash = await argon2.hash(password)
     const t = await sequelize.transaction();
     const newUser = await user.create({
-        userName,
         email,
         passwordHash,
         firstName,
@@ -209,8 +209,26 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
       res.json(questions)
     }
   )
+
+  const getOrgMember = catchAsyncError (
+    async (req,res,next) =>{
+      const userId = req.user.id
+      const organizationObject = await organization.findOne({where : { createdBy: userId}})
+
+      if (!organizationObject) {
+        res.status(404).json( "organization can not be found" )
+      }
+      const orgMembers = await organizationWorker.findAll ({where : { organizationId: organizationObject.id}})
+
+      if (orgMembers.length === 0){
+        return res.status(404).json( " couldn't find questions associated with this form" )
+      }
+
+      res.json(orgMembers)
+    }
+  )
   
   
     
 
-module.exports = { createOrgMember, getFormsByOrganization, getResponsesByForm, getResponseStatsByForm, getResponseStatsByOrganization, validateResponse, getFormQuestions}
+module.exports = { createOrgMember, getFormsByOrganization, getResponsesByForm, getResponseStatsByForm, getResponseStatsByOrganization, validateResponse, getFormQuestions, getOrgMember}

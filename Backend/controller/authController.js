@@ -20,7 +20,7 @@ const generateToken = (payLoad) =>{
 
 const signup = catchAsyncError( async (req,res,next) =>{
 
-    const { userName, email, password, firstName, lastName, userType, gender, age, organizationName, organizationDescription } = req.body;
+    const { email, password, firstName, lastName, userType, gender, age, organizationName, organizationDescription } = req.body;
 
     const passwordHash = await argon2.hash(password)
     let newUser;
@@ -28,7 +28,6 @@ const signup = catchAsyncError( async (req,res,next) =>{
     const t = await sequelize.transaction();
 
     newUser = await user.create({
-        userName,
         email,
         passwordHash,
         firstName,
@@ -60,7 +59,6 @@ const response = {
     message: "Signup successful",
     user: {
       id: newUser.id,
-      userName: newUser.userName,
       email: newUser.email,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
@@ -111,8 +109,11 @@ const login = catchAsyncError( async (req, res, next) =>{
     const result = await user.findOne({where: { email: email}})
     
     if (!result || !(await argon2.verify(result.passwordHash, password))){
-        throw new AppError(message="incorrect email or password ", statusCode=400)
+        throw new AppError(message="Incorrect email or password ", statusCode=400)
     }
+
+    result.lastLogin = new Date()
+    result.save()
 
     const token = result.token = generateToken({
         id: result.id,
@@ -120,7 +121,7 @@ const login = catchAsyncError( async (req, res, next) =>{
     })
 
     return res.json({
-        status:"success",
+        status:"Success",
         token
     })
 })
@@ -132,10 +133,10 @@ const changePassword = catchAsyncError(
         const userObject = await user.findOne({where:{id:userId}})
 
         if (!req.body.newPassword){
-            res.status(404).json(" new password is not provided")
+            res.status(404).json(" New password is not provided")
         }
         if( !userObject){
-            res.status(404).json("user can't be found")
+            res.status(404).json(" User can't be found ")
         }
 
         const newPasswordHash = await argon2.hash(req.body.newPassword)
@@ -144,7 +145,7 @@ const changePassword = catchAsyncError(
 
         res.json({
             status : "success",
-            message : "password updated successfuly"
+            message : "Password updated successfuly"
         })
     })
 
@@ -176,4 +177,4 @@ const getProfile = catchAsyncError (
         }
 )
 
-module.exports = { signup, login, changePassword, getProfile}
+module.exports = { signup, login, changePassword, getProfile }
