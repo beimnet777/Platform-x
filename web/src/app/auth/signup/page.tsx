@@ -53,11 +53,17 @@ const SignUp: React.FC = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors,isSubmitting },
   } = useForm({
     resolver: yupResolver(validationSchema),
   
   });
+
+  const handleUserTypeChange = (type: string) => {
+    setUserType(type);
+    reset(); // Reset the form when switching user types
+  };
 
   const onSubmit = async (data: any) => {
 
@@ -252,7 +258,7 @@ const SignUp: React.FC = () => {
               {/* Tab options for Sign Up */}
               <div className="flex mb-6">
                 <button
-                  onClick={() => setUserType("OrgAdmin")}
+                  onClick={() => handleUserTypeChange("OrgAdmin")}
                   className={`w-1/2 py-2 text-center font-medium ${
                     userType === "OrgAdmin"
                       ? "border-b-2 border-primary text-primary"
@@ -262,7 +268,7 @@ const SignUp: React.FC = () => {
                   Sign Up as Organization
                 </button>
                 <button
-                  onClick={() => setUserType("Agent")}
+                  onClick={() => handleUserTypeChange("Agent")}
                   className={`w-1/2 py-2 text-center font-medium ${
                     userType === "Agent"
                       ? "border-b-2 border-primary text-primary"

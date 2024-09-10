@@ -17,8 +17,15 @@ import AnimatedLink from '@/components/Common/AnimatedLink';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { links, menu } from './constants';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
+  const router = useRouter();
+
+  const handleSignUpClick = () => {
+    router.push('/auth/signup'); // Redirect to the sign-up page
+  };
+
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Wrapper>
@@ -40,7 +47,7 @@ const Header = () => {
           ))}
         </Nav>
         <CallToActions className={isOpen ? 'active' : ''}>
-          <AnimatedLink title="SignUp" />
+          <AnimatedLink title="SignUp" onClick={handleSignUpClick} />
           <GetStartedButton padding="0.5rem 0.75rem" />
         </CallToActions>
       </Inner>

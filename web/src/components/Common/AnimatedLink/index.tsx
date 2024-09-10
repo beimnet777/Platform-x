@@ -57,12 +57,13 @@ const letterAnimationTwo = {
   },
 };
 
-const AnimatedLink = ({ title }: { title: string }) => {
+const AnimatedLink = ({ title, onClick }: { title: string , onClick?: () => void;}) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <Div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick}
     >
       <AnimatedWord
         title={title}
