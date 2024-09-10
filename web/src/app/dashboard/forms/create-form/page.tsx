@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Formik, Field, Form } from 'formik';
 import {
@@ -18,29 +18,41 @@ import {
   MultipleChoiceQuestionType,
   AudioQuestionType,
   AgentGender,
-} from '../../../store/surveySlice';
-import { RootState } from '../../../store/store';
+  resetSurvey,
+} from '../../../../store/surveySlice';
+import { RootState } from '../../../../store/store';
 import ShortAnswerQuestion from '@/components/Form/ShortAnswerQuestion';
 import MultipleChoiceQuestion from '@/components/Form/MultipleChoiceQuestion';
 import AudioQuestion from '@/components/Form/AudioQuestion';
 import Breadcrumb from '@/components/components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from '@/components/components/Layouts/DefaultLayout';
 import SwitcherOne from '@/components/components/Switchers/SwitcherOne';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createForm } from '@/api/forms';
 
 
 const CreateSurvey:  React.FC = ()  => {
   const dispatch = useDispatch();
-  const { questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgents, agentGender } =
-    useSelector((state: RootState) => state.survey);
+  const router = useRouter();
+  
 
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('isEditMode') === 'true';
 
+  useEffect(()=>{
+    if (!isEditMode) {
+      console.log("iseEd")
+      dispatch(resetSurvey())
+    }
+
+  },[isEditMode])
+
+  const { questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgents, agentGender } =
+    useSelector((state: RootState) => state.survey);
   const handleAddQuestion = () => {
     const newQuestion: ShortAnswerQuestionType = {
       id: Date.now().toString(),
-      questionType: 'short_answer',
+      questionType: 'ShortAnswer',
       questionText: '',
       inputType: 'text',
       maxLength: 100,
@@ -59,10 +71,10 @@ const CreateSurvey:  React.FC = ()  => {
     let updatedQuestion;
 
     switch (selectedType) {
-      case 'short_answer':
+      case 'ShortAnswer':
         updatedQuestion = {
           ...questions[currentQuestionIndex],
-          questionType: 'short_answer',
+          questionType: 'ShortAnswer',
           inputType: 'text',
           maxLength: 100,
         } as ShortAnswerQuestionType;
@@ -75,10 +87,10 @@ const CreateSurvey:  React.FC = ()  => {
           maxSelections: 1,
         } as MultipleChoiceQuestionType;
         break;
-      case 'audio':
+      case 'Audio':
         updatedQuestion = {
           ...questions[currentQuestionIndex],
-          questionType: 'audio',
+          questionType: 'Audio',
           maxSize: 10,
           maxDuration: 60,
         } as AudioQuestionType;
@@ -95,7 +107,7 @@ const CreateSurvey:  React.FC = ()  => {
     if (!question) return null;
 
     switch (question.questionType) {
-      case 'short_answer':
+      case 'ShortAnswer':
         return (
           <ShortAnswerQuestion
             id={question.id}
@@ -115,7 +127,7 @@ const CreateSurvey:  React.FC = ()  => {
             maxSelections={question.maxSelections}
           />
         );
-      case 'audio':
+      case 'Audio':
         return (
           <AudioQuestion
             id={question.id}
@@ -130,17 +142,40 @@ const CreateSurvey:  React.FC = ()  => {
     }
   };
 
-  const handleSave = (values: any) => {
+  
+
+  const handleSave = async (values: any) => {
+    const formattedQuestions = questions.map((question: any) => ({
+      questionTitle: question.questionText,
+      questionDescription: question.inputType === "number"
+        ? "Please enter a number."
+        : `Please provide your ${question.inputType}.`,
+      questionType: question.questionType,
+    }));
+  
     const surveyData = {
-      title: values.title,
-      description: values.description,
+      formName: values.title,
+      formDescription: values.description,
+      numberOfQuestion: questions.length,
+      totalResponse: 0,
       isOpen: values.is_open,
       minAgentAge: values.min_agent_age,
+      maxAgentAge: values.min_agent_age + 30,
       maxAgents: values.max_agent_int,
-      agentGender: values.agent_gender,
-      questions,
+      agentGender: values.agent_gender === "Both" ? ["Male", "Female"] : [values.agent_gender],
+      questions: formattedQuestions,
     };
-    console.log(surveyData);
+  
+    console.log(surveyData); // For debugging
+  
+    try {
+      const response = await createForm(surveyData);
+      console.log("Form created successfully:", response);
+      router.push('/dashboard/forms/form-list'); // Redirect to form list page
+    } catch (error) {
+      console.error("Error creating form:", error);
+      // Handle error, show error message to the user
+    }
   };
 
   return (
@@ -255,9 +290,9 @@ const CreateSurvey:  React.FC = ()  => {
                   onChange={handleQuestionTypeChange}
                   className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
                 >
-                  <option value="short_answer">Short Answer</option>
+                  <option value="ShortAnswer">Short Answer</option>
                   <option value="multiple_choice">Multiple Choice</option>
-                  <option value="audio">Audio</option>
+                  <option value="Audio">Audio</option>
                 </select>
               </div>
               

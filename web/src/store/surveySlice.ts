@@ -1,4 +1,5 @@
-// src/store/surveySlice.ts
+// surveySlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 
@@ -7,14 +8,14 @@ interface Option {
   text: string;
 }
 export enum AgentGender {
-  MALE = 'male',
-  FEMALE = 'female',
-  BOTH = 'both'
+  MALE = 'Male',
+  FEMALE = 'Female',
+  BOTH = 'Both'
 }
 
 export type ShortAnswerQuestionType = {
   id: string;
-  questionType: 'short_answer';
+  questionType: 'ShortAnswer';
   questionText: string;
   inputType: 'text' | 'number';
   maxLength: number;
@@ -30,7 +31,7 @@ export type MultipleChoiceQuestionType = {
 
 export type AudioQuestionType = {
   id: string;
-  questionType: 'audio';
+  questionType: 'Audio';
   questionText: string;
   maxSize: number; // Size in MB
   maxDuration: number; // Duration in seconds
@@ -97,6 +98,7 @@ const surveySlice = createSlice({
     setCurrentQuestionIndex: (state, action: PayloadAction<number>) => {
       state.currentQuestionIndex = action.payload;
     },
+    resetSurvey: () => initialState, 
   },
 });
 
@@ -111,6 +113,7 @@ export const {
   replaceQuestion,
   deleteQuestion,
   setCurrentQuestionIndex,
+  resetSurvey,
 } = surveySlice.actions;
 
 export default surveySlice.reducer;

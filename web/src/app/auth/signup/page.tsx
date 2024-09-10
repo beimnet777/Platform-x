@@ -1,16 +1,90 @@
 "use client";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import Link from "next/link";
 import Image from "next/image";
-import logo from '../../../../public/svgs/platform_x_black.svg';
+import logo from "../../../../public/svgs/platform_x_black.svg";
+
 
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
+import useSignupApi from "@/api/signin";
+import { useRouter } from "next/navigation";
+
+// Define validation schema using Yup
+const validationSchema = yup.object().shape({
+  userName: yup.string().required("Username is required"),
+  email: yup.string().email("Invalid email address").required("Email is required"),
+  password: yup
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required"),
+  retypePassword: yup.string().required("Repeat password is required").oneOf([yup.ref('password')], 'Passwords must match'),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  organizationName: yup.string().when('userType', {
+    is: 'OrgAdmin',
+    then: (schema) => schema.required("Organization name is required"),
+  }),
+  organizationDescription: yup.string().when('userType', {
+    is: 'OrgAdmin',
+    then: (schema) => schema.required("Organization description is required"),
+  }),
+  gender: yup.string().when('userType', {
+    is: 'Agent',
+    then: (schema) => schema.required("Gender is required"),
+  }),
+  age: yup.number().when('userType', {
+    is: 'Agent',
+    then: (schema) => schema.required("Age is required").positive().integer(),
+  }),
+});
 
 const SignUp: React.FC = () => {
+  const router = useRouter();
+  const [errorMsg, setErrorMsg] = useState('');
   const [userType, setUserType] = useState("OrgAdmin");
+  const { signupAgent, signupOrganization } = useSignupApi();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors,isSubmitting },
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  
+  });
+
+  const onSubmit = async (data: any) => {
+
+    const fullData ={...data, userType }
+    if (userType === "Agent") {
+      try {
+      const success = await signupAgent(fullData);
+      if (success) {
+        router.push('/dashboard/profile')
+      }
+    }
+    catch (error:any) {
+       setErrorMsg(typeof error === 'string' ? error : error.message)
+    }
+    } else if (userType === "OrgAdmin") {
+      try {
+      const success = await signupOrganization(fullData);
+      if (success) {
+        router.push('/dashboard')
+      }
+    }
+    catch(error:any) {
+      setErrorMsg(typeof error === 'string' ? error : error.message)
+
+    }
+    }
+  };
 
   return (
     <div className="p-5">
@@ -169,6 +243,11 @@ const SignUp: React.FC = () => {
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Sign Up to Platform X
               </h2>
+              {!!errorMsg && (
+            < h5 className="text-red mx-3" >
+              {errorMsg}
+            </h5>
+          )}
 
               {/* Tab options for Sign Up */}
               <div className="flex mb-6">
@@ -194,7 +273,38 @@ const SignUp: React.FC = () => {
                 </button>
               </div>
 
-              <form>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                 <div className="flex flex-col sm:flex-row gap-5">
+                  <div>
+                      <label className="mb-2.5 block font-medium text-black dark:text-white">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        {...register("firstName")}
+                        placeholder="Enter your first name"
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                      {errors.firstName && (
+                        <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>
+                      )}
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="mb-2.5 block font-medium text-black dark:text-white">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        {...register("lastName")}
+                        placeholder="Enter your last name"
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                      {errors.lastName && (
+                        <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>
+                      )}
+                    </div>
+                    </div>
                 {/* Organization form fields */}
                 {userType === "OrgAdmin" && (
                   <>
@@ -204,9 +314,13 @@ const SignUp: React.FC = () => {
                       </label>
                       <input
                         type="text"
+                        {...register("organizationName")}
                         placeholder="Enter organization name"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       />
+                      {errors.organizationName && (
+                        <p className="text-red-500 text-sm mt-1">{errors.organizationName.message}</p>
+                      )}
                     </div>
 
                     <div className="mb-4">
@@ -214,9 +328,13 @@ const SignUp: React.FC = () => {
                         Organization Description
                       </label>
                       <textarea
+                        {...register("organizationDescription")}
                         placeholder="Enter organization description"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       />
+                      {errors.organizationDescription && (
+                        <p className="text-red-500 text-sm mt-1">{errors.organizationDescription.message}</p>
+                      )}
                     </div>
                   </>
                 )}
@@ -224,38 +342,21 @@ const SignUp: React.FC = () => {
                 {/* Agent form fields */}
                 {userType === "Agent" && (
                   <>
-                    <div className="mb-4">
-                      <label className="mb-2.5 block font-medium text-black dark:text-white">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Enter your first name"
-                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="mb-2.5 block font-medium text-black dark:text-white">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Enter your last name"
-                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                      />
-                    </div>
 
                     <div className="mb-4">
                       <label className="mb-2.5 block font-medium text-black dark:text-white">
                         Gender
                       </label>
                       <select
+                        {...register("gender")}
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       >
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                       </select>
+                      {errors.gender && (
+                        <p className="text-red-500 text-sm mt-1">{errors.gender.message}</p>
+                      )}
                     </div>
 
                     <div className="mb-4">
@@ -264,23 +365,32 @@ const SignUp: React.FC = () => {
                       </label>
                       <input
                         type="number"
+                        {...register("age")}
                         placeholder="Enter your age"
                         className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       />
+                      {errors.age && (
+                        <p className="text-red-500 text-sm mt-1">{errors.age.message}</p>
+                      )}
                     </div>
                   </>
                 )}
 
                 {/* Common fields for both user types */}
+               
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Name
+                    Username
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter your full name"
+                    {...register("userName")}
+                    placeholder="Enter your username"
                     className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
+                  {errors.userName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.userName.message}</p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -289,9 +399,13 @@ const SignUp: React.FC = () => {
                   </label>
                   <input
                     type="email"
+                    {...register("email")}
                     placeholder="Enter your email"
                     className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -300,9 +414,13 @@ const SignUp: React.FC = () => {
                   </label>
                   <input
                     type="password"
+                    {...register("password")}
                     placeholder="Enter your password"
                     className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
+                  {errors.password && (
+                    <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                  )}
                 </div>
 
                 <div className="mb-6">
@@ -311,19 +429,30 @@ const SignUp: React.FC = () => {
                   </label>
                   <input
                     type="password"
+                    {...register('retypePassword')}
                     placeholder="Re-enter your password"
                     className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
+                    {errors.retypePassword && (
+                    <p className="text-red-500 text-sm mt-1">{errors.retypePassword.message}</p>
+                  )}
                 </div>
 
                 <div className="mb-5">
-                  <input
-                    type="submit"
-                    value="Create account"
-                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                  />
-                </div>
+                 
 
+                  <button
+                    type="submit"
+                    
+                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90  disabled:cursor-default disabled:bg-whiter disabled:text-primary"
+                  >
+                    { isSubmitting &&        <svg  aria-hidden="true" role="status" className="inline w-6 h-6 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+<path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+</svg> }
+Create account
+</button>
+                </div>
 
                 <div className="mt-6 text-center">
                   <p>

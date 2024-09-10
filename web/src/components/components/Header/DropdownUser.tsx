@@ -1,14 +1,26 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "../ClickOutside";
 import { useRouter } from "next/navigation";
+import useSWR from 'swr';
+import { fetchUserProfile } from "@/api/profile";
+import { logout } from "@/utils/auth";
 
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const profile = false;
   const router = useRouter();
+
+  // Fetch user profile using SWR
+  const { data: user, error, isLoading } = useSWR('user-profile', fetchUserProfile);
+
+  if (isLoading) return null; // Optionally render a loading state
+  if (error) return <div>Error loading user data</div>;
+
+  const userInitials = user ? `${user.userInfo.firstName[0]}${user.userInfo.lastName[0]}` : '';
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -19,26 +31,26 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {user ? `${user.userInfo.firstName} ${user.userInfo.lastName}` : 'Loading...'}
           </span>
-          <span className="block text-xs">Agent</span>
+          <span className="block text-xs">{user ? user.userInfo.userType : ''}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
-        {profile ? (
-                      <div className="h-14 w-14 rounded-full overflow-hidden">
-                        <Image
-                          src={''}
-                          width={55}
-                          height={55}
-                          alt="User"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-14 w-14 rounded-full bg-primary text-white text-lg font-medium">
-                      TA
-                      </div>
-                    )}
+          {user && user.imageSrc ? (
+            <div className="h-14 w-14 rounded-full overflow-hidden">
+              <Image
+                src={user.imageSrc}
+                width={55}
+                height={55}
+                alt="User"
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-primary text-white text-lg font-medium">
+              {userInitials}
+            </div>
+          )}
         </span>
 
         <svg
@@ -66,7 +78,7 @@ const DropdownUser = () => {
           <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
             <li>
               <Link
-                href="/profile"
+                href="/dashboard/profile"
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
@@ -89,10 +101,12 @@ const DropdownUser = () => {
                 My Profile
               </Link>
             </li>
-            
-            
           </ul>
-          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base" onClick={() => {window.location.href = '/' }}>
+          <button
+            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+            onClick={logout}
+
+          >
             <svg
               className="fill-current"
               width="22"

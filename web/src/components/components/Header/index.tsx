@@ -4,6 +4,7 @@ import DropdownMessage from "./DropdownMessage";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Image from "next/image";
+import logo from "../../.../../../../public/svgs/platform_x_black.svg"
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -56,11 +57,11 @@ const Header = (props: {
           </button>
           {/* <!-- Hamburger Toggle BTN --> */}
 
-          <Link className="block flex-shrink-0 lg:hidden" href="/">
+          <Link className="block flex-shrink-0 lg:hidden" href="/dashboard">
             <Image
-              width={32}
-              height={32}
-              src={"/images/logo/logo-icon.svg"}
+              width={64}
+              height={64}
+              src={logo}
               alt="Logo"
             />
           </Link>

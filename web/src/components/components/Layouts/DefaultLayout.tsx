@@ -6,9 +6,10 @@ import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
+import isAuth from "@/app/isAuth";
 
 
-export default function DefaultLayout({
+function DefaultLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -42,3 +43,5 @@ export default function DefaultLayout({
     </>
   );
 }
+
+export default isAuth(DefaultLayout);
