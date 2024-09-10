@@ -7,7 +7,13 @@ import { redirect } from "next/navigation";
 
 export default function isAuth(Component: any) {
   return function IsAuth(props: any) {
-    const auth = localStorage.getItem("accessToken");
+    let auth = '';
+    if (typeof window !== 'undefined') {
+    auth = localStorage.getItem("accessToken") || '';
+    
+     }
+
+   
 
 
     useEffect(() => {

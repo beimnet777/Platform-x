@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Formik, Field, Form } from 'formik';
 import {
@@ -29,24 +29,32 @@ import DefaultLayout from '@/components/components/Layouts/DefaultLayout';
 import SwitcherOne from '@/components/components/Switchers/SwitcherOne';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createForm } from '@/api/forms';
+import Loader from '@/components/components/common/Loader';
 
+const SearchParamsWrapper: React.FC = () => {
+  const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get('isEditMode') === 'true';
+
+  useEffect(() => {
+    if (!isEditMode) {
+      dispatch(resetSurvey());
+    }
+  }, [isEditMode]);
+
+  return   <Breadcrumb pageName={isEditMode ? "Edit Survey" : "Create Survey"} />;
+};
 
 const CreateSurvey:  React.FC = ()  => {
   const dispatch = useDispatch();
   const router = useRouter();
   
+  
 
-  const searchParams = useSearchParams();
-  const isEditMode = searchParams.get('isEditMode') === 'true';
 
-  useEffect(()=>{
-    if (!isEditMode) {
-      console.log("iseEd")
-      dispatch(resetSurvey())
-    }
+ 
 
-  },[isEditMode])
-
+  
   const { questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgents, agentGender } =
     useSelector((state: RootState) => state.survey);
   const handleAddQuestion = () => {
@@ -157,7 +165,7 @@ const CreateSurvey:  React.FC = ()  => {
       formName: values.title,
       formDescription: values.description,
       numberOfQuestion: questions.length,
-      totalResponse: 0,
+      totalResponse: values.max_agent_int,
       isOpen: values.is_open,
       minAgentAge: values.min_agent_age,
       maxAgentAge: values.min_agent_age + 30,
@@ -180,7 +188,11 @@ const CreateSurvey:  React.FC = ()  => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName={isEditMode ? "Edit Survey" : "Create Survey"} />
+    
+
+      <Suspense fallback={<Loader />}>
+        <SearchParamsWrapper />
+      </Suspense>
 
       <div className="container mx-auto p-6 bg-white rounded-md shadow-md">
        

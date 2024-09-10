@@ -1,8 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-const axiosInstance = axios.create({ baseURL: process.env.BASE_URL });
+const axiosInstance = axios.create({ baseURL: 'https://platform-x.onrender.com'});
 
-console.log("hi, axioInstance")
 axiosInstance.interceptors.response.use(
   (res) => res,
   (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong')

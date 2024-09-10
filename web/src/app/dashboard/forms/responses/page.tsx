@@ -1,93 +1,66 @@
 "use client";
 
-import React, { useState } from "react";
-import useSWR from "swr";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
-import { fetcher } from "@/utils/axios";
+import { useRouter, useSearchParams } from "next/navigation";
 import DefaultLayout from "@/components/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/components/Breadcrumbs/Breadcrumb";
+import Loader from "@/components/components/common/Loader";
 import { RootState } from "@/store/store";
+import { fetchFormResponses } from "@/api/forms";
 
-const fallbackData = {
-  totalResponses: 2,
-  responses: [
-    {
-      id: 3,
-      agentId: 1,
-      formId: 4,
-      isValid: false,
-      createdAt: "2024-09-06T15:41:49.991Z",
-      updatedAt: "2024-09-06T15:41:49.994Z",
-      responseDetails: [
-        {
-          id: 1,
-          questionId: 10,
-          responseId: 3,
-          responseText: "Answer to question 1",
-          responseFilePath: "",
-        },
-        {
-          id: 2,
-          questionId: 11,
-          responseId: 3,
-          responseText: "Blue",
-          responseFilePath: "uploads/audio_answer.mp3",
-        },
-        {
-          id: 3,
-          questionId: 12,
-          responseId: 3,
-          responseText: "",
-          responseFilePath: "uploads/audio_answer.mp3",
-        },
-      ],
-    },
-    {
-      id: 4,
-      agentId: 1,
-      formId: 4,
-      isValid: false,
-      createdAt: "2024-09-06T16:51:57.817Z",
-      updatedAt: "2024-09-06T16:51:57.817Z",
-      responseDetails: [
-        {
-          id: 4,
-          questionId: 10,
-          responseId: 4,
-          responseText: "Different answer to question 1",
-          responseFilePath: "",
-        },
-        {
-          id: 5,
-          questionId: 11,
-          responseId: 4,
-          responseText: "Red",
-          responseFilePath: "uploads/audio_answer_2.mp3",
-        },
-        {
-          id: 6,
-          questionId: 12,
-          responseId: 4,
-          responseText: "",
-          responseFilePath: "uploads/audio_answer_2.mp3",
-        },
-      ],
-    },
-  ],
-};
-
-const ResponseList: React.FC = () => {
+const ResponseListContent: React.FC = () => {
   const router = useRouter();
-  const { data: responsesData } = useSWR(
-    "http://localhost:3000/api/v1/orgAdmin/get-responses/4",
-    fetcher,
-    { fallbackData }
-  );
+  const searchParams = useSearchParams();
+  const formId = searchParams.get("formId"); // Get the formId from the query parameter
+
+  const [responsesData, setResponsesData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // State for loading
+
+  useEffect(() => {
+    const fetchResponses = async () => {
+      if (!formId) return;
+
+      try {
+        const data = await fetchFormResponses(Number(formId)); // Fetch form responses
+        setResponsesData(data);
+      } catch (error) {
+        console.error("Error fetching responses:", error);
+      } finally {
+        setIsLoading(false); // Set loading to false once the data is fetched or an error occurs
+      }
+    };
+
+    fetchResponses();
+  }, [formId]); // Dependency array ensures the effect only runs when formId changes
 
   const { questions, title } = useSelector((state: RootState) => state.survey);
   const [currentResponseIndex, setCurrentResponseIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  if (isLoading) {
+    return (
+      <DefaultLayout>
+        <Breadcrumb pageName="Response List" />
+        <Loader />
+      </DefaultLayout>
+    );
+  }
+
+  if (!responsesData || responsesData.responses.length === 0) {
+    // Handle the case where responses are empty
+    return (
+      <DefaultLayout>
+        <Breadcrumb pageName="Response List" />
+        <div className="container mx-auto p-6">
+        <div className="bg-white p-5 rounded shadow">
+          <h2 className="text-2xl font-bold mb-4">Responses for Form: {title}</h2>
+          <p>No responses available.</p>
+        </div>
+        </div>
+      </DefaultLayout>
+    );
+  }
 
   const responses = responsesData.responses;
   const currentResponse = responses[currentResponseIndex];
@@ -130,14 +103,20 @@ const ResponseList: React.FC = () => {
       case "ShortAnswer":
         return (
           <div className="p-4 bg-white shadow-sm rounded-md border border-gray-200">
-            <h4 className="font-semibold text-lg mb-2">Q{currentQuestionIndex + 1}: {question.questionText}</h4>
-            <div className="p-3 bg-gray-50 rounded-md text-black">{responseDetail.responseText || "No answer provided."}</div>
+            <h4 className="font-semibold text-lg mb-2">
+              Q{currentQuestionIndex + 1}: {question.questionText}
+            </h4>
+            <div className="p-3 bg-gray-50 rounded-md text-black">
+              {responseDetail.responseText || "No answer provided."}
+            </div>
           </div>
         );
       case "multiple_choice":
         return (
           <div className="p-4 bg-white shadow-sm rounded-md border border-gray-200">
-            <h4 className="font-semibold text-lg mb-2">Q{currentQuestionIndex + 1}: {question.questionText}</h4>
+            <h4 className="font-semibold text-lg mb-2">
+              Q{currentQuestionIndex + 1}: {question.questionText}
+            </h4>
             <ul className="list-none space-y-1">
               {question.options.map((option: any, index: number) => (
                 <li
@@ -157,7 +136,9 @@ const ResponseList: React.FC = () => {
       case "Audio":
         return (
           <div className="p-4 bg-white shadow-sm rounded-md border border-gray-200">
-            <h4 className="font-semibold text-lg mb-2">Q{currentQuestionIndex + 1}: {question.questionText}</h4>
+            <h4 className="font-semibold text-lg mb-2">
+              Q{currentQuestionIndex + 1}: {question.questionText}
+            </h4>
             <audio controls className="w-full">
               <source
                 src={`http://localhost:3000/${responseDetail.responseFilePath}`}
@@ -184,22 +165,45 @@ const ResponseList: React.FC = () => {
               <button
                 onClick={handlePreviousQuestion}
                 disabled={currentQuestionIndex === 0}
-                className=" text-white px-4 py-2 rounded-md disabled:opacity-50"
+                className="text-white px-4 py-2 rounded-md disabled:opacity-50"
               >
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2B892E"  className="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"  />
-</svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="#2B892E"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 19.5 8.25 12l7.5-7.5"
+                  />
+                </svg>
               </button>
               <button
                 onClick={handleNextQuestion}
                 disabled={
-                  currentQuestionIndex === currentResponse.responseDetails.length - 1
+                  currentQuestionIndex ===
+                  currentResponse.responseDetails.length - 1
                 }
-                className=" text-white px-4 py-2 rounded-md disabled:opacity-50"
+                className="text-white px-4 py-2 rounded-md disabled:opacity-50"
               >
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2B892E" className="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" color="#2B892E"/>
-</svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="#2B892E"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                  />
+                </svg>
               </button>
             </div>
           </div>
@@ -223,6 +227,14 @@ const ResponseList: React.FC = () => {
         </div>
       </div>
     </DefaultLayout>
+  );
+};
+
+const ResponseList: React.FC = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <ResponseListContent />
+    </Suspense>
   );
 };
 
