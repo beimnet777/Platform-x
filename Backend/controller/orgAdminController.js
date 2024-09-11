@@ -218,7 +218,16 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
       if (!organizationObject) {
         res.status(404).json( "organization can not be found" )
       }
-      const orgMembers = await organizationWorker.findAll ({where : { organizationId: organizationObject.id}})
+      const orgMembers = await organizationWorker.findAll (
+        {where : 
+          { organizationId: organizationObject.id
+
+          },
+          include: [{
+            model: user,    
+            attributes: ['id', 'email', 'firstName', 'lastName']
+          }]
+        })
 
       if (orgMembers.length === 0){
         return res.status(404).json( " couldn't find questions associated with this form" )
