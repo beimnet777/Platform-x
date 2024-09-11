@@ -10,7 +10,6 @@ import { createOrganization } from "@/api/organizations";
 
 
 const organizationValidationSchema = yup.object().shape({
-  userName: yup.string().required('Username is required'),
   email: yup.string().email('Invalid email format').required('Email is required'),
   password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
   firstName: yup.string().required('First name is required'),
@@ -117,20 +116,6 @@ const CreateOrganizationForm = () => {
                   )}
                 </div>
 
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    {...register('userName')}
-                    placeholder="Enter username"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                  {errors.userName && (
-                    <p className="text-red-500 text-sm mt-1">{errors.userName.message}</p>
-                  )}
-                </div>
 
                 <div className="mb-4.5">
                   <label className="mb-3 block text-sm font-medium text-black dark:text-white">

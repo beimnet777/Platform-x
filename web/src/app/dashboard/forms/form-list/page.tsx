@@ -10,6 +10,11 @@ import {
   setSurveyTitle,
   setSurveyDescription,
   addQuestion,
+  setSurveyMinAge,
+  setSurveyMaxAgents,
+  resetSurvey,
+  setSurveyMaxAge,
+  setFormId,
 } from "../../../../store/surveySlice";
 import { fetcher } from "@/utils/axios";
 import DefaultLayout from "@/components/components/Layouts/DefaultLayout";
@@ -35,21 +40,29 @@ const FormList: React.FC = () => {
 
   const handleEditSurvey = async (formId: number, form: any) => {
     try {
-      // Fetch the questions for the specific form
+      dispatch(resetSurvey())
       const formQuestionsData = await fetchFormQuestions(formId);
       const questions = formQuestionsData;
   
       // Format the questions as needed
       const formattedQuestions = questions.map((question: any) => ({
-        questionTitle: question.questionText,
+        questionText: question.questionTitle,
         questionDescription: 'text',
         questionType: question.questionType,
+        maxSize: 10,
+        maxDuration: 60,
+        maxLength: 100
       }));
+      console.log(questions,formattedQuestions, "tex" )
   
       // Set the survey data in the Redux store
+      dispatch(setFormId(formId))
       dispatch(setSurveyTitle(form.formName));
       dispatch(setSurveyDescription(form.formDescription));
       dispatch(setSurveyIsOpen(form.isOpen));
+      dispatch(setSurveyMinAge(form.minAgentAge))
+      dispatch(setSurveyMaxAgents(form.totalResponse))
+      dispatch(setSurveyMaxAge(form.maxAgentAge))
       formattedQuestions.forEach((question: any) => {
         dispatch(addQuestion(question));
       });
@@ -66,7 +79,7 @@ const FormList: React.FC = () => {
 
   const handleViewResponses = async (formId: number, form: any) => {
     try {
-      // Fetch the questions for the specific form
+      dispatch(resetSurvey())
       const formQuestionsData = await fetchFormQuestions(formId);
       const questions = formQuestionsData;
 
@@ -74,12 +87,19 @@ const FormList: React.FC = () => {
       dispatch(setSurveyTitle(form.formName));
       dispatch(setSurveyDescription(form.formDescription));
       dispatch(setSurveyIsOpen(form.isOpen));
+      dispatch(setSurveyMinAge(form.minAgentAge))
+      dispatch(setSurveyMaxAge(form.maxAgentAge))
+      dispatch(setSurveyMaxAgents(form.totalResponse))
 
        // Format the questions as needed
        const formattedQuestions = questions.map((question: any) => ({
-        questionTitle: question.questionText,
+        questionText: question.questionTitle,
         questionDescription: 'text',
         questionType: question.questionType,
+        maxSize: 10,
+        maxDuration: 60,
+        maxLength: 100,
+
       }));
 
       formattedQuestions.forEach((question: any) => {

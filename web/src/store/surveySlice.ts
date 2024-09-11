@@ -40,10 +40,12 @@ export type AudioQuestionType = {
 export type Question = ShortAnswerQuestionType | MultipleChoiceQuestionType | AudioQuestionType;
 
 export interface SurveyState {
+  formId:number;
   title: string;
   description: string;
   isOpen: boolean;
   minAgentAge: number;
+  maxAgentAge: number;
   maxAgents: number;
   agentGender: AgentGender;
   questions: Question[];
@@ -51,10 +53,12 @@ export interface SurveyState {
 }
 
 const initialState: SurveyState = {
+  formId : -1,
   title: '',
   description: '',
   isOpen: false,
   minAgentAge: 18,
+  maxAgentAge:18,
   maxAgents: 100,
   agentGender: AgentGender.BOTH,
   questions: [],
@@ -65,6 +69,9 @@ const surveySlice = createSlice({
   name: 'survey',
   initialState,
   reducers: {
+    setFormId: (state, action: PayloadAction<number>) => {
+      state.formId = action.payload;
+    },
     setSurveyTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;
     },
@@ -76,6 +83,9 @@ const surveySlice = createSlice({
     },
     setSurveyMinAge: (state, action: PayloadAction<number>) => {
       state.minAgentAge = action.payload;
+    },
+    setSurveyMaxAge: (state, action: PayloadAction<number>) => {
+      state.maxAgentAge = action.payload;
     },
     setSurveyMaxAgents: (state, action: PayloadAction<number>) => {
       state.maxAgents = action.payload;
@@ -103,10 +113,12 @@ const surveySlice = createSlice({
 });
 
 export const {
+  setFormId,
   setSurveyTitle,
   setSurveyDescription,
   setSurveyIsOpen,
   setSurveyMinAge,
+  setSurveyMaxAge,
   setSurveyMaxAgents,
   setSurveyGender,
   addQuestion,

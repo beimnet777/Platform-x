@@ -1,19 +1,29 @@
+import axios from "@/utils/axios";
 import useSWR from "swr";
 
 // Fetcher function to get organization response data
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
 
 const useOrganizationResponseStats = (startDate: string, endDate: string) => {
+  
   const { data, error } = useSWR(
-    `http://localhost:3000/api/v1/orgAdmin/get-organization-response-stat/?startDate=${startDate}&endDate=${endDate}`,
-    fetcher,
-    { fallbackData: { responseCount: 7 } } // Fallback value
+    `/api/v1/orgAdmin/get-organization-response-stat/?startDate=${startDate}&endDate=${endDate}`,
+    fetcher
   );
 
+
   return {
-    data:{ responseCount: 7 },
-    isLoading: !error && !data,
-    isError: false,
+    data, 
+    isLoading: !data && !error, 
+    isError: !!error, 
   };
 };
 

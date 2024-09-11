@@ -49,7 +49,7 @@ const menuGroups = [
         ),
         label: "Dashboard",
         route: "/dashboard",
-        role: ['SuperAdmin', 'OrgAdmin', 'OrgMember']
+        role: ['OrgAdmin', 'OrgMember']
       },
       {
         icon: (
@@ -98,6 +98,7 @@ const menuGroups = [
           { label: "Create Org Admin", route: "/dashboard/users/create-organization",  role: ['SuperAdmin'] },
           { label: "Create Agent", route: "/dashboard/users/create-agent",  role: ['SuperAdmin'] },
           { label: "Create Org Member", route: "/dashboard/users/create-org-member",  role: [ 'OrgAdmin'] },
+          { label: "Org Members", route: "/dashboard/users/org-members",  role: [ 'OrgAdmin'] },
           { label: "Agents", route:'/dashboard/users/agents',  role: ['SuperAdmin']},
           { label: "Organizations", route: '/dashboard/users/organizations',  role: ['SuperAdmin']}
         ],

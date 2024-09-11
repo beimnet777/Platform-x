@@ -149,7 +149,7 @@ const Settings = () => {
                     <button className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white" type="button">
                       Cancel
                     </button>
-                    <button className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90" type="submit">
+                    <button disabled className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 disabled:bg-opacity-30" type="submit">
                       Save
                     </button>
                   </div>
@@ -179,14 +179,14 @@ const Settings = () => {
                     <div>
                       <span className="mb-1.5 text-black dark:text-white">Edit your photo</span>
                       <span className="flex gap-2.5">
-                        <button className="text-sm hover:text-primary">Delete</button>
-                        <button className="text-sm hover:text-primary">Update</button>
+                        <button disabled className="text-sm hover:text-primary">Delete</button>
+                        <button disabled className="text-sm hover:text-primary">Update</button>
                       </span>
                     </div>
                   </div>
 
                   <div id="FileUpload" className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5">
-                    <input type="file" accept="image/*" className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none" />
+                    <input disabled type="file" accept="image/*" className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none" />
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <span className="flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -207,7 +207,7 @@ const Settings = () => {
                     <button className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white" type="button">
                       Cancel
                     </button>
-                    <button className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90" type="submit">
+                    <button disabled className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90 disabled:bg-opacity-30" type="submit">
                       Save
                     </button>
                   </div>

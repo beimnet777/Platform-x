@@ -11,7 +11,6 @@ import DefaultLayout from "@/components/components/Layouts/DefaultLayout";
 
 // Define the validation schema using Yup
 const schema = yup.object().shape({
-  userName:yup.string().required("First name is required"),
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -38,7 +37,7 @@ const CreateOrgMemberForm = () => {
 
       
         // Redirect to the dashboard after a successful API call
-        router.push("/dashboard");
+        router.push("/dashboard/users/org-members");
      
     } catch (error) {
       console.error("Error creating organization member:", error);
@@ -86,18 +85,6 @@ const CreateOrgMemberForm = () => {
                   {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName.message}</p>}
                 </div>
 
-                <div className="mb-4.5">
-                  <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter your last name"
-                    {...register("userName")}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                  {errors.userName && <p className="text-red-500 text-sm">{errors.userName.message}</p>}
-                </div>
 
                 <div className="mb-4.5">
                   <label className="mb-3 block text-sm font-medium text-black dark:text-white">

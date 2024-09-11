@@ -17,7 +17,6 @@ import { useRouter } from "next/navigation";
 
 // Define validation schema using Yup
 const validationSchema = yup.object().shape({
-  userName: yup.string().required("Username is required"),
   email: yup.string().email("Invalid email address").required("Email is required"),
   password: yup
     .string()
@@ -384,20 +383,6 @@ const SignUp: React.FC = () => {
 
                 {/* Common fields for both user types */}
                
-                <div className="mb-4">
-                  <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    {...register("userName")}
-                    placeholder="Enter your username"
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                  {errors.userName && (
-                    <p className="text-red-500 text-sm mt-1">{errors.userName.message}</p>
-                  )}
-                </div>
 
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Formik, Field, Form } from 'formik';
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import {
   addQuestion,
   replaceQuestion,
@@ -19,6 +20,7 @@ import {
   AudioQuestionType,
   AgentGender,
   resetSurvey,
+  setSurveyMaxAge,
 } from '../../../../store/surveySlice';
 import { RootState } from '../../../../store/store';
 import ShortAnswerQuestion from '@/components/Form/ShortAnswerQuestion';
@@ -28,36 +30,103 @@ import Breadcrumb from '@/components/components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from '@/components/components/Layouts/DefaultLayout';
 import SwitcherOne from '@/components/components/Switchers/SwitcherOne';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createForm } from '@/api/forms';
+import { createForm, updateForm } from '@/api/forms';
 import Loader from '@/components/components/common/Loader';
 
 const SearchParamsWrapper: React.FC = () => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('isEditMode') === 'true';
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!isEditMode) {
       dispatch(resetSurvey());
     }
+    setLoading(false); 
   }, [isEditMode]);
 
-  return   <Breadcrumb pageName={isEditMode ? "Edit Survey" : "Create Survey"} />;
+  if (loading) {
+    return <Loader />;
+  }
+
+  return <Breadcrumb pageName={isEditMode ? "Edit Survey" : "Create Survey"} />;
 };
 
-const CreateSurvey:  React.FC = ()  => {
+
+const validationSchema = Yup.object().shape({
+  title: Yup.string().required('Form title is required'),
+  description: Yup.string().required('Form description is required'),
+  min_agent_age: Yup.number()
+    .min(18, 'Minimum age must be at least 18')
+    .required('Minimum age is required'),
+  max_agent_age: Yup.number()
+    .min(Yup.ref('min_agent_age'), 'Maximum age must be greater than or equal to minimum age')
+    .required('Maximum age is required'),
+  max_agent_int: Yup.number()
+    .min(1, 'Max agents must be at least 1')
+    .required('Max agents is required'),
+});
+
+const CreateSurvey: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  
-  
+  const [loading, setLoading] = useState(false);
+  const [questionError, setQuestionError] = useState<string | null>(null); // State for question error
 
-
- 
-
-  
-  const { questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgents, agentGender } =
+  const { formId,questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender } =
     useSelector((state: RootState) => state.survey);
+
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get('isEditMode') === 'true';
+
+  // Initialize initial form values state
+  const [initialValues, setInitialValues] = useState({
+    title: '',
+    description: '',
+    is_open: false,
+    min_agent_age: 18,
+    max_agent_age: 18,
+    max_agent_int: 100,
+    agent_gender: AgentGender.BOTH,
+  });
+
+  useEffect(() => {
+    if (!isEditMode) {
+      // Reinitialize form values if not in edit mode
+      setInitialValues({
+        title: '',
+        description: '',
+        is_open: false,
+        min_agent_age: 18,
+        max_agent_age: 18,
+        max_agent_int: 100,
+        agent_gender: AgentGender.BOTH,
+      });
+    } else {
+      // Set form values from the state if in edit mode
+      setInitialValues({
+        title,
+        description,
+        is_open: isOpen,
+        min_agent_age: minAgentAge,
+        max_agent_age: maxAgentAge,
+        max_agent_int: maxAgents,
+        agent_gender: agentGender,
+      });
+    }
+  }, [isEditMode, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender]);
+
+  if (loading) {
+    return (
+      <DefaultLayout>
+        <Loader />
+      </DefaultLayout>
+    );
+  }
+
   const handleAddQuestion = () => {
+    setQuestionError(null); // Reset question error when adding a question
     const newQuestion: ShortAnswerQuestionType = {
       id: Date.now().toString(),
       questionType: 'ShortAnswer',
@@ -150,64 +219,72 @@ const CreateSurvey:  React.FC = ()  => {
     }
   };
 
-  
+  const handleSave = async (values: any, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
+    setQuestionError(null); // Reset question error before validating
+    if (questions.length === 0) {
+      setQuestionError('Please add at least one question.');
+      setSubmitting(false);
+      return;
+    }
 
-  const handleSave = async (values: any) => {
     const formattedQuestions = questions.map((question: any) => ({
       questionTitle: question.questionText,
-      questionDescription: question.inputType === "number"
-        ? "Please enter a number."
-        : `Please provide your ${question.inputType}.`,
+      questionDescription: question.inputType === 'number' ? 'Please enter a number.' : `Please provide your ${question.inputType}.`,
       questionType: question.questionType,
     }));
-  
+
     const surveyData = {
       formName: values.title,
       formDescription: values.description,
       numberOfQuestion: questions.length,
       totalResponse: values.max_agent_int,
-      isOpen: values.is_open,
+      isOpen: isOpen,
       minAgentAge: values.min_agent_age,
-      maxAgentAge: values.min_agent_age + 30,
+      maxAgentAge: values.max_agent_age,
       maxAgents: values.max_agent_int,
-      agentGender: values.agent_gender === "Both" ? ["Male", "Female"] : [values.agent_gender],
+      agentGender: values.agent_gender === 'Both' ? ['Male', 'Female'] : [values.agent_gender],
       questions: formattedQuestions,
     };
-  
+
     console.log(surveyData); // For debugging
-  
+
     try {
-      const response = await createForm(surveyData);
-      console.log("Form created successfully:", response);
+      if (isEditMode){
+        await updateForm(formId, surveyData)
+      }
+      else {
+       await createForm(surveyData);
+      }
+      
+      dispatch(resetSurvey());
+     
       router.push('/dashboard/forms/form-list'); // Redirect to form list page
     } catch (error) {
-      console.error("Error creating form:", error);
-      // Handle error, show error message to the user
+      console.error('Error creating form:', error);
+      
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleIsOpenChange = (isOpen: boolean) => {
+    dispatch(setSurveyIsOpen(isOpen));
   };
 
   return (
     <DefaultLayout>
-    
-
       <Suspense fallback={<Loader />}>
         <SearchParamsWrapper />
       </Suspense>
-
+      {/* Main content */}
       <div className="container mx-auto p-6 bg-white rounded-md shadow-md">
-       
         <Formik
-          initialValues={{
-            title,
-            description,
-            is_open: isOpen,
-            min_agent_age: minAgentAge,
-            max_agent_int: maxAgents,
-            agent_gender: agentGender,
-          }}
+          initialValues={initialValues}
+          enableReinitialize // Enable reinitialization when initialValues change
+          validationSchema={validationSchema} // Apply validation schema
           onSubmit={handleSave}
         >
-          {({ handleChange, values }) => (
+          {({ handleChange, values, errors, touched, isSubmitting }) => (
             <Form>
               {/* Survey Details Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -223,8 +300,9 @@ const CreateSurvey:  React.FC = ()  => {
                         handleChange(e);
                         dispatch(setSurveyTitle(e.target.value));
                       }}
-                      className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                      className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.title && touched.title ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
                     />
+                    <ErrorMessage name="title" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-black dark:text-white mb-2">Form Description </label>
@@ -236,8 +314,9 @@ const CreateSurvey:  React.FC = ()  => {
                         handleChange(e);
                         dispatch(setSurveyDescription(e.target.value));
                       }}
-                      className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                      className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.description && touched.description ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
                     />
+                    <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
                 </div>
 
@@ -247,7 +326,7 @@ const CreateSurvey:  React.FC = ()  => {
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-black dark:text-white mb-2">Is Open </label>
-                      <SwitcherOne />
+                      <SwitcherOne isOpen={isOpen} onToggle={handleIsOpenChange} />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-black dark:text-white mb-2">Minimum Agent Age </label>
@@ -260,8 +339,24 @@ const CreateSurvey:  React.FC = ()  => {
                           handleChange(e);
                           dispatch(setSurveyMinAge(Number(e.target.value)));
                         }}
-                        className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                        className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.min_agent_age && touched.min_agent_age ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
                       />
+                      <ErrorMessage name="min_agent_age" component="div" className="text-red-500 text-sm mt-1" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black dark:text-white mb-2">Maximum Agent Age </label>
+                      <Field
+                        name="max_agent_age"
+                        type="number"
+                        min="0"
+                        value={values.max_agent_age}
+                        onChange={(e: any) => {
+                          handleChange(e);
+                          dispatch(setSurveyMaxAge(Number(e.target.value)));
+                        }}
+                        className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.max_agent_age && touched.max_agent_age ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
+                      />
+                      <ErrorMessage name="max_agent_age" component="div" className="text-red-500 text-sm mt-1" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-black dark:text-white mb-2">Max Agents </label>
@@ -274,8 +369,9 @@ const CreateSurvey:  React.FC = ()  => {
                           handleChange(e);
                           dispatch(setSurveyMaxAgents(Number(e.target.value)));
                         }}
-                        className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                        className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.max_agent_int && touched.max_agent_int ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
                       />
+                      <ErrorMessage name="max_agent_int" component="div" className="text-red-500 text-sm mt-1" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-black dark:text-white mb-2">Agent Gender </label>
@@ -308,7 +404,6 @@ const CreateSurvey:  React.FC = ()  => {
                 </select>
               </div>
               
-
               {/* Display Current Question */}
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-2" hidden={currentQuestionIndex <= 0}>Question {currentQuestionIndex+1}</h2>
@@ -321,7 +416,7 @@ const CreateSurvey:  React.FC = ()  => {
                         type="button"
                         onClick={() => dispatch(setCurrentQuestionIndex(currentQuestionIndex - 1))}
                         disabled={currentQuestionIndex === 0}
-                        className="bg-meta-3 text-white px-4 py-2 rounded-md mr-2"
+                        className="bg-primary text-white px-4 py-2 rounded-md mr-2"
                         hidden= {currentQuestionIndex <= 0}
                       >
                         Previous
@@ -330,7 +425,7 @@ const CreateSurvey:  React.FC = ()  => {
                         type="button"
                         onClick={() => dispatch(setCurrentQuestionIndex(currentQuestionIndex + 1))}
                         disabled={currentQuestionIndex === questions.length - 1}
-                        className="bg-black text-white px-4 py-2 rounded-md"
+                        className="bg-secondary text-white px-4 py-2 rounded-md"
                         hidden={currentQuestionIndex === questions.length - 1}
                       >
                         Next
@@ -344,19 +439,20 @@ const CreateSurvey:  React.FC = ()  => {
                   onClick={handleAddQuestion}
                   className="rounded-full border border-primary text-primary  px-4 py-2 mt-4 flex items-center"
                 >
-                 
-                
-                Add Question 
+                  Add Question 
                 </button>
+                {questionError && <div className="text-red-500 text-sm mt-2">{questionError}</div>} {/* Display question error */}
               </div>
 
               {/* Navigation and Actions */}
               
-
               {/* Save Survey Button */}
               <div className="flex justify-end mt-6">
-                <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-md">
-                  Save Survey
+                <button type="submit" className="bg-primary text-white px-4 py-2 rounded-md" disabled={isSubmitting}>
+                { isSubmitting &&        <svg  aria-hidden="true" role="status" className="inline w-6 h-6 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+<path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+</svg> } Save Survey
                 </button>
               </div>
 

@@ -1,7 +1,22 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const SwitcherOne = () => {
-  const [enabled, setEnabled] = useState<boolean>(false);
+interface SwitcherOneProps {
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
+}
+
+const SwitcherOne: React.FC<SwitcherOneProps> = ({ isOpen, onToggle }) => {
+  const [enabled, setEnabled] = useState<boolean>(isOpen);
+
+  useEffect(() => {
+    setEnabled(isOpen); // Sync local state with the prop value
+  }, [isOpen]);
+
+  const handleToggle = () => {
+    const newEnabled = !enabled;
+    setEnabled(newEnabled);
+    onToggle(newEnabled);
+  };
 
   return (
     <div>
@@ -14,9 +29,8 @@ const SwitcherOne = () => {
             type="checkbox"
             id="toggle1"
             className="sr-only"
-            onChange={() => {
-              setEnabled(!enabled);
-            }}
+            checked={enabled}
+            onChange={handleToggle}
           />
           <div className="block h-8 w-14 rounded-full bg-meta-9 dark:bg-[#5A616B]"></div>
           <div

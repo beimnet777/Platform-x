@@ -10,6 +10,17 @@ export const createForm = async (formData: any) => {
     throw error;
   }
 };
+export const updateForm = async (formId:any, formData:any) => {
+  try {
+    const response = await axios.put(`api/v1/orgAdmin/update-form/${formId}`, formData);
+
+    console.log('Form updated successfully:', response.data);
+    return response.data; // Return the response data
+  } catch (error) {
+    console.error('Error updating form:', error);
+    throw error;
+  }
+};
 
 // Fetch all forms
 export const fetchForms = async () => {
