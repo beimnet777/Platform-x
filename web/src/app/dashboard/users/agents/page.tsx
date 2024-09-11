@@ -8,11 +8,10 @@ import DefaultLayout from "@/components/components/Layouts/DefaultLayout";
 import Loader from "@/components/components/common/Loader";
 import ConfirmationModal from "@/components/modal/ConfirmationModal";
 
-
 const AgentsPage = () => {
   const { data, mutate, isLoading } = useSWR("/api/v1/SuperAdmin/get-agents", fetchAgents);
   const [filter, setFilter] = useState<"all" | "approved" | "unapproved">("all");
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [agentToApprove, setAgentToApprove] = useState<number | null>(null);
 
@@ -78,59 +77,67 @@ const AgentsPage = () => {
           </div>
 
           <div className="flex flex-col">
-            <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
-              <div className="p-2.5 xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Name</h5>
+            {isLoading ? (
+              <Loader />
+            ) : filteredAgents.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-gray-600 dark:text-gray-400">No agents available</p>
               </div>
-              <div className="p-2.5 text-center xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Email</h5>
-              </div>
-              <div className="p-2.5 text-center xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Gender</h5>
-              </div>
-              <div className="hidden p-2.5 text-center sm:block xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Actions</h5>
-              </div>
-            </div>
-            {isLoading && <Loader />}
-            {!isLoading &&
-              filteredAgents.map((agent: any, key: any) => (
-                <div
-                  className={`grid grid-cols-3 sm:grid-cols-4 ${
-                    key === filteredAgents.length - 1
-                      ? ""
-                      : "border-b border-stroke dark:border-strokedark"
-                  }`}
-                  key={key}
-                >
-                  <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">
-                      {agent.user.firstName} {agent.user.lastName}
-                    </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
+                  <div className="p-2.5 xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Name</h5>
                   </div>
-
-                  <div className="flex items-center justify-center p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">{agent.user.email}</p>
+                  <div className="p-2.5 text-center xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Email</h5>
                   </div>
-
-                  <div className="flex items-center justify-center p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">{agent.gender}</p>
+                  <div className="p-2.5 text-center xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Gender</h5>
                   </div>
-
-                  <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-                    {!agent.approved ? (
-                      <button
-                        onClick={() => handleOpenModal(agent.id)}
-                        className="text-white bg-primary px-3 py-1 rounded"
-                      >
-                        Approve
-                      </button>
-                    ) : (
-                      <span className="text-green-500">Approved</span>
-                    )}
+                  <div className="hidden p-2.5 text-center sm:block xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Actions</h5>
                   </div>
                 </div>
-              ))}
+                {filteredAgents.map((agent: any, key: any) => (
+                  <div
+                    className={`grid grid-cols-3 sm:grid-cols-4 ${
+                      key === filteredAgents.length - 1
+                        ? ""
+                        : "border-b border-stroke dark:border-strokedark"
+                    }`}
+                    key={key}
+                  >
+                    <div className="flex items-center gap-3 p-2.5 xl:p-5">
+                      <p className="text-black dark:text-white">
+                        {agent.user.firstName} {agent.user.lastName}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-center p-2.5 xl:p-5">
+                      <p className="text-black dark:text-white">{agent.user.email}</p>
+                    </div>
+
+                    <div className="flex items-center justify-center p-2.5 xl:p-5">
+                      <p className="text-black dark:text-white">{agent.gender}</p>
+                    </div>
+
+                    <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+                      {!agent.approved ? (
+                        <button
+                          onClick={() => handleOpenModal(agent.id)}
+                          className="text-white bg-primary px-3 py-1 rounded"
+                        >
+                          Approve
+                        </button>
+                      ) : (
+                        <span className="text-green-500">Approved</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>

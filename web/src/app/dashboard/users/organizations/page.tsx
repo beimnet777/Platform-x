@@ -8,7 +8,6 @@ import DefaultLayout from "@/components/components/Layouts/DefaultLayout";
 import Loader from "@/components/components/common/Loader";
 import ConfirmationModal from "@/components/modal/ConfirmationModal";
 
-
 const OrganizationsPage = () => {
   const { data, mutate, isLoading } = useSWR(
     "/api/v1/SuperAdmin/list-organizations",
@@ -80,58 +79,67 @@ const OrganizationsPage = () => {
         </div>
 
         <div className="flex flex-col">
-          <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
-            <div className="p-2.5 xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">Name</h5>
+          {isLoading ? (
+            <Loader />
+          ) : filteredOrganizations.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-gray-600 dark:text-gray-400">No organizations available</p>
             </div>
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">Email</h5>
-            </div>
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">Organization</h5>
-            </div>
-            <div className="hidden p-2.5 text-center sm:block xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">Actions</h5>
-            </div>
-          </div>
-          {isLoading && <Loader />}
-          {filteredOrganizations.map((org: any, key: any) => (
-            <div
-              className={`grid grid-cols-3 sm:grid-cols-4 ${
-                key === filteredOrganizations.length - 1
-                  ? ""
-                  : "border-b border-stroke dark:border-strokedark"
-              }`}
-              key={key}
-            >
-              <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">
-                  {org.user.firstName} {org.user.lastName}
-                </p>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
+                <div className="p-2.5 xl:p-5">
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Name</h5>
+                </div>
+                <div className="p-2.5 text-center xl:p-5">
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Email</h5>
+                </div>
+                <div className="p-2.5 text-center xl:p-5">
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Organization</h5>
+                </div>
+                <div className="hidden p-2.5 text-center sm:block xl:p-5">
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Actions</h5>
+                </div>
               </div>
+              {filteredOrganizations.map((org: any, key: any) => (
+                <div
+                  className={`grid grid-cols-3 sm:grid-cols-4 ${
+                    key === filteredOrganizations.length - 1
+                      ? ""
+                      : "border-b border-stroke dark:border-strokedark"
+                  }`}
+                  key={key}
+                >
+                  <div className="flex items-center gap-3 p-2.5 xl:p-5">
+                    <p className="text-black dark:text-white">
+                      {org.user.firstName} {org.user.lastName}
+                    </p>
+                  </div>
 
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{org.user.email}</p>
-              </div>
+                  <div className="flex items-center justify-center p-2.5 xl:p-5">
+                    <p className="text-black dark:text-white">{org.user.email}</p>
+                  </div>
 
-              <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{org.organizationName}</p>
-              </div>
+                  <div className="flex items-center justify-center p-2.5 xl:p-5">
+                    <p className="text-black dark:text-white">{org.organizationName}</p>
+                  </div>
 
-              <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-                {!org.approved ? (
-                  <button
-                    onClick={() => handleOpenModal(org.id)}
-                    className="text-white bg-primary px-3 py-1 rounded"
-                  >
-                    Approve
-                  </button>
-                ) : (
-                  <span className="text-green-500">Approved</span>
-                )}
-              </div>
-            </div>
-          ))}
+                  <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
+                    {!org.approved ? (
+                      <button
+                        onClick={() => handleOpenModal(org.id)}
+                        className="text-white bg-primary px-3 py-1 rounded"
+                      >
+                        Approve
+                      </button>
+                    ) : (
+                      <span className="text-green-500">Approved</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
 

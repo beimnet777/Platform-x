@@ -61,52 +61,55 @@ const OrgMemberPage = () => {
             <h4 className="text-xl font-semibold text-black dark:text-white">
               List of Organization Members
             </h4>
-
             {/* Filter Dropdown */}
-           
           </div>
 
           <div className="flex flex-col">
-            <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
-              <div className="p-2.5 xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Name</h5>
+            {isLoading ? (
+              <Loader />
+            ) : filteredMembers.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-gray-600 dark:text-gray-400">No organization members available</p>
               </div>
-              <div className="p-2.5 text-center xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Email</h5>
-              </div>
-              <div className="p-2.5 text-center xl:p-4">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Job Title</h5>
-              </div>
-             
-            </div>
-            {isLoading && <Loader />}
-            {!isLoading &&
-              filteredMembers.map((member: any, key: any) => (
-                <div
-                  className={`grid grid-cols-3 sm:grid-cols-4 ${
-                    key === filteredMembers.length - 1
-                      ? ""
-                      : "border-b border-stroke dark:border-strokedark"
-                  }`}
-                  key={key}
-                >
-                  <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">
-                      {member?.user?.firstName} {member?.user?.lastName}
-                    </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-3">
+                  <div className="p-2.5 xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Name</h5>
                   </div>
-
-                  <div className="flex items-center justify-center p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">{member?.user?.email}</p>
+                  <div className="p-2.5 text-center xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Email</h5>
                   </div>
-
-                  <div className="flex items-center justify-center p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">{member.jobTitle}</p>
+                  <div className="p-2.5 text-center xl:p-4">
+                    <h5 className="text-sm font-medium uppercase xsm:text-base">Job Title</h5>
                   </div>
-
-                
                 </div>
-              ))}
+                {filteredMembers.map((member: any, key: any) => (
+                  <div
+                    className={`grid grid-cols-3 sm:grid-cols-3 ${
+                      key === filteredMembers.length - 1
+                        ? ""
+                        : "border-b border-stroke dark:border-strokedark"
+                    }`}
+                    key={key}
+                  >
+                    <div className="flex items-center gap-3 p-2.5 xl:p-5">
+                      <p className="text-black dark:text-white">
+                        {member?.user?.firstName} {member?.user?.lastName}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-center p-2.5 xl:p-5">
+                      <p className="text-black dark:text-white">{member?.user?.email}</p>
+                    </div>
+
+                    <div className="flex items-center justify-center p-2.5 xl:p-5">
+                      <p className="text-black dark:text-white">{member.jobTitle}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>

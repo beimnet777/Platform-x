@@ -114,8 +114,7 @@ const SignUp: React.FC = () => {
                 />
               </Link>
               <p className="2xl:px-20">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit
-                suspendisse.
+              This is Signup Page Platform X
               </p>
               <span className="mt-15 inline-block">
                 <svg

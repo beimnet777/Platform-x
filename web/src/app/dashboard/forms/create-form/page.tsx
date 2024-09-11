@@ -50,7 +50,7 @@ const SearchParamsWrapper: React.FC = () => {
     return <Loader />;
   }
 
-  return <Breadcrumb pageName={isEditMode ? "Edit Survey" : "Create Survey"} />;
+  return <Breadcrumb pageName={isEditMode ? "Edit Form" : "Create Form"} />;
 };
 
 
