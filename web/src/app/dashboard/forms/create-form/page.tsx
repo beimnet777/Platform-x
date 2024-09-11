@@ -249,6 +249,7 @@ const CreateSurvey: React.FC = () => {
     console.log(surveyData); // For debugging
 
     try {
+      dispatch(resetSurvey());
       if (isEditMode){
         await updateForm(formId, surveyData)
       }
@@ -256,7 +257,7 @@ const CreateSurvey: React.FC = () => {
        await createForm(surveyData);
       }
       
-      dispatch(resetSurvey());
+      
      
       router.push('/dashboard/forms/form-list'); // Redirect to form list page
     } catch (error) {
@@ -474,4 +475,12 @@ const CreateSurvey: React.FC = () => {
   );
 };
 
-export default CreateSurvey;
+const SurveyCreateEdit: React.FC = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <CreateSurvey />
+    </Suspense>
+  );
+};
+
+export default SurveyCreateEdit;

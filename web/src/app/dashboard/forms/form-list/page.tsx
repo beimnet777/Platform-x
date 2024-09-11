@@ -43,9 +43,11 @@ const FormList: React.FC = () => {
       dispatch(resetSurvey())
       const formQuestionsData = await fetchFormQuestions(formId);
       const questions = formQuestionsData;
+     
   
       // Format the questions as needed
       const formattedQuestions = questions.map((question: any) => ({
+        id: question.id,
         questionText: question.questionTitle,
         questionDescription: 'text',
         questionType: question.questionType,
