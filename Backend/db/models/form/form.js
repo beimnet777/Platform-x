@@ -31,6 +31,18 @@ const form = sequelize.define('form',{
     type: Sequelize.BOOLEAN,
     defaultValue :true
   },
+  estimatedTime :{
+    type: Sequelize.INTEGER,
+    allowNull : false
+  },
+  tags :{
+    type: Sequelize.ARRAY(Sequelize.STRING),
+    allowNull : false
+  },
+  reward :{
+    type: Sequelize.INTEGER,
+    allowNull : false
+  },
   numberOfQuestion: {
     type: Sequelize.INTEGER,
     allowNull:false

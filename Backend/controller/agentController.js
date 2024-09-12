@@ -71,7 +71,7 @@ const getTaskHistory = catchAsyncError( async (req, res) => {
             },
             {
                 model: form,
-                attributes: ['id', 'formName', 'formDescription'],
+                attributes: ['id', 'formName', 'formDescription', 'estimatedTime', 'tags', 'reward'],
                 include: [
                     {
                         model: question,

@@ -18,12 +18,15 @@ const createForm = catchAsyncError( async (req, res) => {
     minAgentAge, 
     maxAgentAge, 
     agentGender, 
-    questions 
+    questions ,
+    estimatedTime,
+    tags,
+    reward,
   } =  req.body;
   
 
   // Validate required fields
-  if (!formName || !formDescription || !numberOfQuestion || !totalResponse || !minAgentAge || !maxAgentAge || !agentGender || !questions) {
+  if (!formName || !formDescription || !numberOfQuestion || !totalResponse || !minAgentAge || !maxAgentAge || !agentGender || !questions || !reward) {
     return res.status(400).json({ error: 'All required fields must be provided.' });
   }
 
@@ -40,6 +43,9 @@ const createForm = catchAsyncError( async (req, res) => {
       organizationId,
       formDescription,
       isOpen,
+      estimatedTime,
+      tags,
+      reward,
       numberOfQuestion,
       totalResponse,
       currentResponse: 0,
@@ -82,6 +88,9 @@ const updateForm =  catchAsyncError(async (req, res) => {
     organizationId,
     formDescription,
     isOpen,
+    estimatedTime,
+    tags,
+    reward,
     minAgentAge,
     maxAgentAge,
     agentGender,
@@ -98,6 +107,9 @@ const updateForm =  catchAsyncError(async (req, res) => {
       organizationId,
       formDescription,
       isOpen,
+      estimatedTime,
+      tags,
+      reward,
       numberOfQuestion,   // Update number of questions
       totalResponse,      // Update total response
       currentResponse,    // Update current response
@@ -242,8 +254,8 @@ const submitForm =catchAsyncError( async (req, res) => {
     }
 
 
-    agentObject.totalMoneyEarned +=50
-    agentObject.currentBalance+=50
+    agentObject.totalMoneyEarned +=formRecord.reward
+    agentObject.currentBalance+=formRecord.reward
 
     await agentObject.save()
 
