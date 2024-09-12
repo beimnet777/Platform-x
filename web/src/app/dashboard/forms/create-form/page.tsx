@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -21,6 +21,9 @@ import {
   AgentGender,
   resetSurvey,
   setSurveyMaxAge,
+  setSurveyEstimatedTime,
+  setSurveyBudget,
+  setSurveyTags,
 } from '../../../../store/surveySlice';
 import { RootState } from '../../../../store/store';
 import ShortAnswerQuestion from '@/components/Form/ShortAnswerQuestion';
@@ -53,10 +56,12 @@ const SearchParamsWrapper: React.FC = () => {
   return <Breadcrumb pageName={isEditMode ? "Edit Form" : "Create Form"} />;
 };
 
-
 const validationSchema = Yup.object().shape({
   title: Yup.string().required('Form title is required'),
   description: Yup.string().required('Form description is required'),
+  estimated_time: Yup.number().min(1, 'Estimated time must be at least 1 minute').required('Estimated time is required'),
+  tags: Yup.array(),
+  budget: Yup.number().min(0, 'Budget must be at least 0').required('Budget is required'),
   min_agent_age: Yup.number()
     .min(18, 'Minimum age must be at least 18')
     .required('Minimum age is required'),
@@ -72,18 +77,21 @@ const CreateSurvey: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [questionError, setQuestionError] = useState<string | null>(null); // State for question error
+  const [questionError, setQuestionError] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>([]); // State for tags input
 
-  const { formId,questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender } =
+  const { formId, questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender } =
     useSelector((state: RootState) => state.survey);
 
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('isEditMode') === 'true';
 
-  // Initialize initial form values state
   const [initialValues, setInitialValues] = useState({
     title: '',
     description: '',
+    estimated_time: 10,
+    tags: [],
+    budget: 0,
     is_open: false,
     min_agent_age: 18,
     max_agent_age: 18,
@@ -93,10 +101,12 @@ const CreateSurvey: React.FC = () => {
 
   useEffect(() => {
     if (!isEditMode) {
-      // Reinitialize form values if not in edit mode
       setInitialValues({
         title: '',
         description: '',
+        estimated_time: 10,
+        tags: [],
+        budget: 0,
         is_open: false,
         min_agent_age: 18,
         max_agent_age: 18,
@@ -104,10 +114,12 @@ const CreateSurvey: React.FC = () => {
         agent_gender: AgentGender.BOTH,
       });
     } else {
-      // Set form values from the state if in edit mode
       setInitialValues({
         title,
         description,
+        estimated_time: 10, 
+        tags: [], 
+        budget: 0, 
         is_open: isOpen,
         min_agent_age: minAgentAge,
         max_agent_age: maxAgentAge,
@@ -116,6 +128,24 @@ const CreateSurvey: React.FC = () => {
       });
     }
   }, [isEditMode, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender]);
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent the default form submission behavior
+      const newTag = e.currentTarget.value.trim();
+      if (newTag && !tags.includes(newTag)) {
+        setTags([...tags, newTag]);
+        dispatch(setSurveyTags([...tags, newTag]));
+      }
+      e.currentTarget.value = '';
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    const newTags = tags.filter(t => t !== tag);
+    setTags(newTags);
+    dispatch(setSurveyTags(newTags));
+  };
 
   if (loading) {
     return (
@@ -220,7 +250,8 @@ const CreateSurvey: React.FC = () => {
   };
 
   const handleSave = async (values: any, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
-    setQuestionError(null); // Reset question error before validating
+    console.log(values);
+    setQuestionError(null); 
     if (questions.length === 0) {
       setQuestionError('Please add at least one question.');
       setSubmitting(false);
@@ -236,6 +267,9 @@ const CreateSurvey: React.FC = () => {
     const surveyData = {
       formName: values.title,
       formDescription: values.description,
+      estimatedTime: values.estimated_time,
+      budget: values.budget,
+      tags: tags,
       numberOfQuestion: questions.length,
       totalResponse: values.max_agent_int,
       isOpen: isOpen,
@@ -246,23 +280,16 @@ const CreateSurvey: React.FC = () => {
       questions: formattedQuestions,
     };
 
-    console.log(surveyData); // For debugging
-
     try {
       dispatch(resetSurvey());
-      if (isEditMode){
-        await updateForm(formId, surveyData)
+      if (isEditMode) {
+        await updateForm(formId, surveyData);
+      } else {
+        await createForm(surveyData);
       }
-      else {
-       await createForm(surveyData);
-      }
-      
-      
-     
-      router.push('/dashboard/forms/form-list'); // Redirect to form list page
+      router.push('/dashboard/forms/form-list');
     } catch (error) {
       console.error('Error creating form:', error);
-      
     } finally {
       setSubmitting(false);
     }
@@ -277,17 +304,15 @@ const CreateSurvey: React.FC = () => {
       <Suspense fallback={<Loader />}>
         <SearchParamsWrapper />
       </Suspense>
-      {/* Main content */}
       <div className="container mx-auto p-6 bg-white rounded-md shadow-md">
         <Formik
           initialValues={initialValues}
-          enableReinitialize // Enable reinitialization when initialValues change
-          validationSchema={validationSchema} // Apply validation schema
+          enableReinitialize
+          validationSchema={validationSchema}
           onSubmit={handleSave}
         >
           {({ handleChange, values, errors, touched, isSubmitting }) => (
             <Form>
-              {/* Survey Details Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div>
                   <h2 className="text-xl font-extrabold mb-2">Form Details</h2>
@@ -318,6 +343,55 @@ const CreateSurvey: React.FC = () => {
                       className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.description && touched.description ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
                     />
                     <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-black dark:text-white mb-2">Estimated Time (minutes)</label>
+                    <Field
+                      name="estimated_time"
+                      type="number"
+                      min="1"
+                      value={values.estimated_time}
+                      onChange={(e: any) => {
+                        handleChange(e);
+                        dispatch(setSurveyEstimatedTime(Number(e.target.value)));
+                      }}
+                      className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.estimated_time && touched.estimated_time ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
+                    />
+                    <ErrorMessage name="estimated_time" component="div" className="text-red-500 text-sm mt-1" />
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-black dark:text-white mb-2">Tags</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {tags.map(tag => (
+                        <div key={tag} className="flex items-center bg-gray-200  rounded border-[.5px] border-stroke bg-gray px-2.5 py-1.5 text-sm">
+                          {tag}
+                          <button type="button" onClick={() => removeTag(tag)} className="ml-2 text-red-500">x</button>
+                        </div>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Add a tag"
+                      onKeyDown={handleAddTag}
+                      className="w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                    />
+                  
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-black dark:text-white mb-2">Budget(in Birr)</label>
+                    <Field
+                      name="budget"
+                      type="number"
+                      min="0"
+                      value={values.budget}
+                      onChange={(e: any) => {
+                        handleChange(e);
+                        dispatch(setSurveyBudget(Number(e.target.value)));
+                      }}
+                      className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.budget && touched.budget ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
+                    />
+                    <ErrorMessage name="budget" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
                 </div>
 
