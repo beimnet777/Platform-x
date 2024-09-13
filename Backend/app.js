@@ -42,6 +42,12 @@ app.use(errorLogger)
 // global error handler
 app.use(globalErrorHandler)
 
+setInterval(()=>{
+    console.log("every 10 min")
+    http.get("https://platform-x.onrender.com/uploads/1725641517698-909081345.mp3");
+  
+  },10 * 60 * 1000)
+
 const port = process.env.PORT || 3000
 app.listen(port, ()=>{
     console.log ("application is working")
