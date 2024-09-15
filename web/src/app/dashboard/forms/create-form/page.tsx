@@ -126,7 +126,7 @@ const CreateSurvey: React.FC = () => {
         max_agent_int: maxAgents,
         agent_gender: agentGender,
       });
-      console.log(initialValues,"init")
+      setTags(tags)
     }
   }, [isEditMode, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender, tags]);
 
