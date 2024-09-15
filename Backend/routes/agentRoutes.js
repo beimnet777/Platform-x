@@ -1,7 +1,7 @@
 const {getAgentFormsFeed,getTaskHistory, getAgentProfile} = require('../controller/agentController')
 const { submitForm, getFormQuestions } = require('../controller/formController')
 const { authentication, restrictTo } = require('../middleware/authMiddleware')
-const { upload } = require('../middleware/fileUpload')
+const upload  = require('../middleware/fileUpload')
 const router = require('express').Router()
 
 router.route('/submitForm').post(authentication,restrictTo("Agent"),upload.any(), submitForm)

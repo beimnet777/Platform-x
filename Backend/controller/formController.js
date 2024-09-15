@@ -6,6 +6,28 @@ const responseDetail = require("../db/models/response/responsedetail");
 const agent = require("../db/models/user/agent");
 const organization = require("../db/models/user/organization");
 const catchAsyncError = require("../utils/catchAsyncError");
+const cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
+
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Helper function to upload files to Cloudinary
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+      if (error) {
+        return reject(error);
+      }
+      resolve(result);
+    });
+    streamifier.createReadStream(fileBuffer).pipe(uploadStream);
+  });
+};
 
 
 const createForm = catchAsyncError( async (req, res) => {
@@ -239,7 +261,9 @@ const submitForm =catchAsyncError( async (req, res) => {
       let responseFilePath = ""
 
       if (req.files && req.files[questionId]) {
-        responseFilePath = req.files[questionId][0].path; // Save file path
+        const fileBuffer = req.files[questionId][0].buffer; // Get the file buffer from Multer
+        const result = await uploadToCloudinary(fileBuffer); // Upload file to Cloudinary
+        responseFilePath = result.secure_url;
       }
 
       // Create response detail for each answer
