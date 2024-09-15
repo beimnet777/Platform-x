@@ -1,0 +1,10 @@
+2024-09-15 11:13:19 [INFO]: Request from Guest at ::1 - POST /api/v1/auth/signup/agent - 2024-09-15T08:13:19.070Z
+2024-09-15 11:13:39 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms - 2024-09-15T08:13:39.283Z
+2024-09-15 11:13:53 [INFO]: Request from Guest at ::1 - POST /api/v1/auth/signup/agent - 2024-09-15T08:13:53.658Z
+2024-09-15 11:14:08 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms - 2024-09-15T08:14:08.008Z
+2024-09-15 11:14:28 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms - 2024-09-15T08:14:28.117Z
+2024-09-15 11:14:39 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms - 2024-09-15T08:14:39.156Z
+2024-09-15 12:43:09 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms - 2024-09-15T09:43:09.339Z
+2024-09-15 12:43:28 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms - 2024-09-15T09:43:28.496Z
+2024-09-15 12:43:43 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms?tags=su - 2024-09-15T09:43:43.056Z
+2024-09-15 12:43:50 [INFO]: Request from Guest at ::1 - GET /api/v1/agent/get-forms?tags=not%20so%20nice - 2024-09-15T09:43:50.979Z
