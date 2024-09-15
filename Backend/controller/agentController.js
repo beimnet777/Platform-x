@@ -33,6 +33,11 @@ const getAgentFormsFeed = catchAsyncError(async (req, res) => {
         maxAgentAge: {
             [Op.gte]: age, // Agent age is less or equal to max age
         },
+        id: {
+            [Op.notIn]: sequelize.literal(
+              `(SELECT "formId" FROM "response" WHERE "agentId" = ${agentObject.id})`
+            ),
+          },
     };
 
     // If tags are provided, add the tags filter
