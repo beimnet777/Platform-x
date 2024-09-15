@@ -78,9 +78,9 @@ const CreateSurvey: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [questionError, setQuestionError] = useState<string | null>(null);
-  const [tags, setTags] = useState<string[]>([]); // State for tags input
+  const [tagsList, setTags] = useState<string[]>([]); // State for tags input
 
-  const { formId, questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender } =
+  const { formId, questions, currentQuestionIndex, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender, reward, estimatedTime, tags } =
     useSelector((state: RootState) => state.survey);
 
   const searchParams = useSearchParams();
@@ -117,9 +117,9 @@ const CreateSurvey: React.FC = () => {
       setInitialValues({
         title,
         description,
-        estimated_time: 10, 
-        tags: [], 
-        reward: 0, 
+        estimated_time: estimatedTime, 
+        tags: tags as never[], 
+        reward: reward, 
         is_open: isOpen,
         min_agent_age: minAgentAge,
         max_agent_age: maxAgentAge,
@@ -133,16 +133,16 @@ const CreateSurvey: React.FC = () => {
     if (e.key === 'Enter') {
       e.preventDefault(); // Prevent the default form submission behavior
       const newTag = e.currentTarget.value.trim();
-      if (newTag && !tags.includes(newTag)) {
-        setTags([...tags, newTag]);
-        dispatch(setSurveyTags([...tags, newTag]));
+      if (newTag && !tagsList.includes(newTag)) {
+        setTags([...tagsList, newTag]);
+        dispatch(setSurveyTags([...tagsList, newTag]));
       }
       e.currentTarget.value = '';
     }
   };
 
   const removeTag = (tag: string) => {
-    const newTags = tags.filter(t => t !== tag);
+    const newTags = tagsList.filter(t => t !== tag);
     setTags(newTags);
     dispatch(setSurveyTags(newTags));
   };
@@ -269,7 +269,7 @@ const CreateSurvey: React.FC = () => {
       formDescription: values.description,
       estimatedTime: values.estimated_time,
       reward: values.reward,
-      tags: tags,
+      tags: tagsList,
       numberOfQuestion: questions.length,
       totalResponse: values.max_agent_int,
       isOpen: isOpen,
@@ -363,7 +363,7 @@ const CreateSurvey: React.FC = () => {
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-black dark:text-white mb-2">Tags</label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {tags.map(tag => (
+                      {tagsList.map(tag => (
                         <div key={tag} className="flex items-center bg-gray-200  rounded border-[.5px] border-stroke bg-gray px-2.5 py-1.5 text-sm">
                           {tag}
                           <button type="button" onClick={() => removeTag(tag)} className="ml-2 text-red-500">x</button>
