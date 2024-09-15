@@ -109,6 +109,7 @@ const FormList: React.FC = () => {
 
       // Format the questions as needed
       const formattedQuestions = questions.map((question: any) => ({
+        id: question.id,
         questionText: question.questionTitle,
         questionDescription: "text",
         questionType: question.questionType,

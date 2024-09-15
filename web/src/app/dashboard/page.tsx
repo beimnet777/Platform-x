@@ -16,8 +16,8 @@ const chartOptions: ApexOptions = {
     fontFamily: "Satoshi, sans-serif",
     type: "donut",
   },
-  colors: ["#3C50E0", "#80CAEE"],
-  labels: ["Form Responses", "Organization Responses"],
+  colors: [ "#80CAEE"],
+  labels: ["Organization Responses"],
   legend: {
     show: true,
     position: "bottom",
@@ -86,19 +86,17 @@ const DonutChartWithFilters: React.FC = () => {
   const endDate = timePeriod === "This Week" ? endDateThisWeek : endDateLastWeek;
 
 
-  const { data: formData, isLoading: isLoadingForm } = useFormResponseStats(startDate, endDate);
   const { data: organizationData, isLoading: isLoadingOrganization } = useOrganizationResponseStats(startDate, endDate);
 
  
-  const isLoading = isLoadingForm || isLoadingOrganization;
+  const isLoading = isLoadingOrganization;
 
  
-  const formResponseCount = formData?.responseCount || 0;
   const organizationResponseCount = organizationData?.responseCount || 0;
-  const series = [formResponseCount, organizationResponseCount];
+  const series = [organizationResponseCount];
 
   // Check if there is no data
-  const isNoDataAvailable = !isLoading && formResponseCount === 0 && organizationResponseCount === 0;
+  const isNoDataAvailable = !isLoading && organizationResponseCount === 0;
 
   return (
     <DefaultLayout>

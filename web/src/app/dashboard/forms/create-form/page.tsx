@@ -260,6 +260,7 @@ const CreateSurvey: React.FC = () => {
     }
 
     const formattedQuestions = questions.map((question: any) => ({
+      id: isEditMode && typeof question.id === 'number'   ? question.id : null,
       questionTitle: question.questionText,
       questionDescription: question.inputType === 'number' ? 'Please enter a number.' : `Please provide your ${question.inputType}.`,
       questionType: question.questionType,

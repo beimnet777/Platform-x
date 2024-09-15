@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 // Define the validation schema using Yup
 const validationSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email address').required('Email is required'),
-  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+  password: Yup.string().min(6, 'Password must be at least 8 characters').required('Password is required'),
 });
 
 const SignIn: React.FC = () => {
@@ -237,7 +237,7 @@ const SignIn: React.FC = () => {
                   <div className="relative">
                     <input
                       type="password"
-                      placeholder="6+ Characters, 1 Capital letter"
+                      placeholder="Enter your password"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       {...register('password')}
                     />

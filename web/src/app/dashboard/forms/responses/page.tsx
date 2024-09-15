@@ -141,7 +141,7 @@ const ResponseListContent: React.FC = () => {
             </h4>
             <audio controls className="w-full">
               <source
-                src={`http://localhost:3000/${responseDetail.responseFilePath}`}
+                src={`${responseDetail.responseFilePath}`}
                 type="audio/mp3"
               />
               Your browser does not support the audio element.

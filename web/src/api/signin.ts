@@ -12,7 +12,7 @@ export const signIn = async (credentials: SignInCredentials) => {
   try {
     const response = await axios.post('/api/v1/auth/login', credentials);
     console.log(response)
-    if (response.data.status === 'success' && response.data.token) {
+    if (response.data.status === 'Success' && response.data.token) {
       const { token } = response.data;
 
       setStorage(token); // Store the token and decode role

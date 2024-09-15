@@ -13,7 +13,7 @@ const fetcher = async (url: string) => {
 const useFormResponseStats = (startDate: string, endDate: string) => {
  
   const { data, error } = useSWR(
-    `/api/v1/orgAdmin/get-form-response-stat/4?startDate=${startDate}&endDate=${endDate}`,
+    `/api/v1/orgAdmin/get-organization-response-stat?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 
