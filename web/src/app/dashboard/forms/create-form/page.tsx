@@ -22,7 +22,7 @@ import {
   resetSurvey,
   setSurveyMaxAge,
   setSurveyEstimatedTime,
-  setSurveyBudget,
+  setSurveyReward,
   setSurveyTags,
 } from '../../../../store/surveySlice';
 import { RootState } from '../../../../store/store';
@@ -61,7 +61,7 @@ const validationSchema = Yup.object().shape({
   description: Yup.string().required('Form description is required'),
   estimated_time: Yup.number().min(1, 'Estimated time must be at least 1 minute').required('Estimated time is required'),
   tags: Yup.array(),
-  budget: Yup.number().min(0, 'Budget must be at least 0').required('Budget is required'),
+  reward: Yup.number().min(0, 'Reward must be at least 0').required('Reward is required'),
   min_agent_age: Yup.number()
     .min(18, 'Minimum age must be at least 18')
     .required('Minimum age is required'),
@@ -91,7 +91,7 @@ const CreateSurvey: React.FC = () => {
     description: '',
     estimated_time: 10,
     tags: [],
-    budget: 0,
+    reward: 0,
     is_open: false,
     min_agent_age: 18,
     max_agent_age: 18,
@@ -106,7 +106,7 @@ const CreateSurvey: React.FC = () => {
         description: '',
         estimated_time: 10,
         tags: [],
-        budget: 0,
+        reward: 0,
         is_open: false,
         min_agent_age: 18,
         max_agent_age: 18,
@@ -119,7 +119,7 @@ const CreateSurvey: React.FC = () => {
         description,
         estimated_time: 10, 
         tags: [], 
-        budget: 0, 
+        reward: 0, 
         is_open: isOpen,
         min_agent_age: minAgentAge,
         max_agent_age: maxAgentAge,
@@ -268,7 +268,7 @@ const CreateSurvey: React.FC = () => {
       formName: values.title,
       formDescription: values.description,
       estimatedTime: values.estimated_time,
-      budget: values.budget,
+      reward: values.reward,
       tags: tags,
       numberOfQuestion: questions.length,
       totalResponse: values.max_agent_int,
@@ -379,19 +379,19 @@ const CreateSurvey: React.FC = () => {
                   
                   </div>
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-black dark:text-white mb-2">Budget(in Birr)</label>
+                    <label className="block text-sm font-medium text-black dark:text-white mb-2">Reward(in Birr)</label>
                     <Field
-                      name="budget"
+                      name="reward"
                       type="number"
                       min="0"
-                      value={values.budget}
+                      value={values.reward}
                       onChange={(e: any) => {
                         handleChange(e);
-                        dispatch(setSurveyBudget(Number(e.target.value)));
+                        dispatch(setSurveyReward(Number(e.target.value)));
                       }}
-                      className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.budget && touched.budget ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
+                      className={`w-full rounded-lg border-[1.5px] px-5 py-3 text-black outline-none transition focus:border-primary ${errors.reward && touched.reward ? 'border-red-500' : 'border-stroke'} dark:border-form-strokedark dark:bg-form-input dark:text-white`}
                     />
-                    <ErrorMessage name="budget" component="div" className="text-red-500 text-sm mt-1" />
+                    <ErrorMessage name="reward" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
                 </div>
 

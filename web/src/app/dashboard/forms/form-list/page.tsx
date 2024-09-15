@@ -16,7 +16,7 @@ import {
   setSurveyMaxAge,
   setFormId,
   setSurveyEstimatedTime,
-  setSurveyBudget,
+  setSurveyReward,
   setSurveyTags,
 } from "../../../../store/surveySlice";
 import { fetcher } from "@/utils/axios";
@@ -73,7 +73,7 @@ const FormList: React.FC = () => {
       dispatch(setSurveyMaxAgents(form.totalResponse));
       dispatch(setSurveyMaxAge(form.maxAgentAge));
       dispatch(setSurveyEstimatedTime(form.estimatedTime));
-      dispatch(setSurveyBudget(form.budget));
+      dispatch(setSurveyReward(form.reward));
       dispatch(setSurveyTags(form.tags));
       formattedQuestions.forEach((question: any) => {
         dispatch(addQuestion(question));
@@ -104,7 +104,7 @@ const FormList: React.FC = () => {
       dispatch(setSurveyMaxAge(form.maxAgentAge));
       dispatch(setSurveyMaxAgents(form.totalResponse));
       dispatch(setSurveyEstimatedTime(form.estimatedTime));
-      dispatch(setSurveyBudget(form.budget));
+      dispatch(setSurveyReward(form.reward));
       dispatch(setSurveyTags(form.tags));
 
       // Format the questions as needed

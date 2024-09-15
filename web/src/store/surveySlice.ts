@@ -52,7 +52,7 @@ export interface SurveyState {
   currentQuestionIndex: number;
   estimatedTime: number; 
   tags: string[]; 
-  budget: number; 
+  reward: number; 
 }
 
 const initialState: SurveyState = {
@@ -68,7 +68,7 @@ const initialState: SurveyState = {
   currentQuestionIndex: 0,
   estimatedTime: 10, 
   tags: [], 
-  budget: 0, 
+  reward: 0, 
 };
 
 const surveySlice = createSlice({
@@ -90,8 +90,8 @@ const surveySlice = createSlice({
     setSurveyTags(state, action: PayloadAction<string[]>) {
       state.tags = action.payload;
     },
-    setSurveyBudget(state, action: PayloadAction<number>) {
-      state.budget = action.payload;
+    setSurveyReward(state, action: PayloadAction<number>) {
+      state.reward = action.payload;
     },
     setSurveyIsOpen: (state, action: PayloadAction<boolean>) => {
       state.isOpen = action.payload;
@@ -138,7 +138,7 @@ export const {
   setSurveyGender,
   setSurveyEstimatedTime,
   setSurveyTags,
-  setSurveyBudget,
+  setSurveyReward,
   addQuestion,
   replaceQuestion,
   deleteQuestion,
