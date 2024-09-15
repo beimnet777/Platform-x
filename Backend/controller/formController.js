@@ -6,28 +6,12 @@ const responseDetail = require("../db/models/response/responsedetail");
 const agent = require("../db/models/user/agent");
 const organization = require("../db/models/user/organization");
 const catchAsyncError = require("../utils/catchAsyncError");
-const cloudinary = require('cloudinary').v2;
-const streamifier = require('streamifier');
+const uploadToCloudinary = require("../config/cloudinary")
 
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
-// Helper function to upload files to Cloudinary
-const uploadToCloudinary = (fileBuffer) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
-      if (error) {
-        return reject(error);
-      }
-      resolve(result);
-    });
-    streamifier.createReadStream(fileBuffer).pipe(uploadStream);
-  });
-};
+
+
 
 
 const createForm = catchAsyncError( async (req, res) => {
@@ -259,11 +243,15 @@ const submitForm =catchAsyncError( async (req, res) => {
           .json({ message: `Question ${questionId} does not belong to form ${formId}` });
       }
       let responseFilePath = ""
-
-      if (req.files && req.files[questionId]) {
-        const fileBuffer = req.files[questionId][0].buffer; // Get the file buffer from Multer
+      let idx = 0
+      console.log("*************************", req.files)
+      if (questionExists.questionType==="Audio" && req.files && req.files.length > 0) {
+        console.log("*****************")
+        const fileBuffer = req.files[idx].buffer; // Get the file buffer from Multer
         const result = await uploadToCloudinary(fileBuffer); // Upload file to Cloudinary
+        console.log(result)
         responseFilePath = result.secure_url;
+        idx+=1
       }
 
       // Create response detail for each answer
