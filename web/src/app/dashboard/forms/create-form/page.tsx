@@ -90,7 +90,7 @@ const CreateSurvey: React.FC = () => {
     title: '',
     description: '',
     estimated_time: 10,
-    tags: [],
+    tags: [] as string[],
     reward: 0,
     is_open: false,
     min_agent_age: 18,
@@ -118,7 +118,7 @@ const CreateSurvey: React.FC = () => {
         title,
         description,
         estimated_time: estimatedTime, 
-        tags: tags as never[], 
+        tags, 
         reward: reward, 
         is_open: isOpen,
         min_agent_age: minAgentAge,
@@ -126,8 +126,9 @@ const CreateSurvey: React.FC = () => {
         max_agent_int: maxAgents,
         agent_gender: agentGender,
       });
+      console.log(initialValues,"init")
     }
-  }, [isEditMode, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender]);
+  }, [isEditMode, title, description, isOpen, minAgentAge, maxAgentAge, maxAgents, agentGender, tags]);
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
