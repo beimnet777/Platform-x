@@ -9,7 +9,7 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const { Op } = require('sequelize');
 
 const getAgentFormsFeed = catchAsyncError(async (req, res) => {
-    const { page = 1, limit = 10, tags } = req.query; // Added tags parameter from query
+    const { page = 1, limit = 10, tags, minReward, maxReward, minTime, maxTime } = req.query; // Added tags parameter from query
     const userId = req.user.id;
 
     // Fetch agent profile
@@ -42,11 +42,25 @@ const getAgentFormsFeed = catchAsyncError(async (req, res) => {
 
     // If tags are provided, add the tags filter
     if (tags) {
-        const tagsArray = tags.split(','); // Convert comma-separated tags to array
+        const tagsArray = tags.split(','); 
         whereCondition.tags = {
-            [Op.contains]: tagsArray, // Match forms that contain the provided tags
+            [Op.contains]: tagsArray, 
         };
     }
+    
+    if (minReward && maxReward) {
+        whereCondition.reward = {
+            [Op.between]: [minReward, maxReward+1], // Match forms that contain the provided tags
+        };
+    }
+
+    if (minTime && maxTime) {
+        whereCondition.estimatedTime = {
+            [Op.between]: [minReward, maxReward+1], // Match forms that contain the provided tags
+        };
+    }
+
+
 
     // Fetch forms that match the agent's profile, open status, and tags if provided
     const forms = await form.findAndCountAll({

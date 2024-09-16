@@ -1,4 +1,6 @@
 require('dotenv').config({ path: `${process.cwd()}/.env`})
+const http = require('http');
+
 const path = require('path')
 const express = require ('express')
 const app = express()
@@ -43,7 +45,6 @@ app.use(errorLogger)
 app.use(globalErrorHandler)
 
 setInterval(()=>{
-    console.log("every 10 min")
     http.get("https://platform-x.onrender.com/uploads/1725641517698-909081345.mp3");
   
   },10 * 60 * 1000)
