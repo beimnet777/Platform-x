@@ -1,5 +1,5 @@
 require('dotenv').config({ path: `${process.cwd()}/.env`})
-const http = require('http');
+const https = require('https');
 
 const path = require('path')
 const express = require ('express')
@@ -45,7 +45,8 @@ app.use(errorLogger)
 app.use(globalErrorHandler)
 
 setInterval(()=>{
-    http.get("https://platform-x.onrender.com/uploads/1725641517698-909081345.mp3");
+    
+    https.get("https://platform-x.onrender.com/uploads/1725641517698-909081345.mp3");
   
   },10 * 60 * 1000)
 
