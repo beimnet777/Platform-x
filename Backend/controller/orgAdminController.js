@@ -137,12 +137,18 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
   const getResponseStatsByForm = catchAsyncError(async (req, res) => {
     const { formId } = req.params;
     const { startDate, endDate } = req.query;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    
+    const endWithExtraDay = new Date(end.getTime() + 24 * 60 * 60 * 1000); 
   
       const responseCount = await response.count({
         where: {
           formId: formId,
           createdAt: {
-            [Op.between]: [new Date(startDate), new Date(endDate)],
+            [Op.between]: [start, endWithExtraDay],
           },
         },
       });
@@ -155,6 +161,12 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
   const getResponseStatsByOrganization = catchAsyncError(async (req, res) => {
     const { startDate, endDate } = req.query;
 
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Add one day to the endDate
+    const endWithExtraDay = new Date(end.getTime() + 24 * 60 * 60 * 1000); 
+
 
     const organizationObject = await organization.findOne({where: { createdBy: req.user.id }})
     const organizationId = organizationObject.dataValues.id
@@ -162,7 +174,7 @@ const createOrgMember  = catchAsyncError( async (req, res) => {
       const responseCount = await response.count({
         where: {
           createdAt: {
-            [Op.between]: [new Date(startDate), new Date(endDate)],
+            [Op.between]: [start, endWithExtraDay],
           },
         },
         include: [{
