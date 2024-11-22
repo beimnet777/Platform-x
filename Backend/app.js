@@ -46,7 +46,7 @@ app.use(globalErrorHandler)
 
 setInterval(()=>{
     
-    https.get("https://platform-x.onrender.com/uploads/1725641517698-909081345.mp3");
+    https.get("https://rakt-nearest-foodtruck-challenge.onrender.com/foodtrucksnearby/");
   
   },10 * 60 * 1000)
 
