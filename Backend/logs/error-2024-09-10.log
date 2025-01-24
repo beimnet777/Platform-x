@@ -1,0 +1,12 @@
+2024-09-10 11:13:24 [ERROR]: Error in request from Guest at ::1 - POST /api/v1/auth/signup/agent - 2024-09-10T08:13:24.856Z - Error: notNull Violation: organization.organizationName cannot be null,
+notNull Violation: organization.organizationDescription cannot be null
+2024-09-10 11:40:51 [ERROR]: Error in request from Guest at ::1 - GET /api/v1/orgAdmin/get-organization-member - 2024-09-10T08:40:51.163Z - Error: You are not logged in
+2024-09-10 12:31:31 [ERROR]: Error in request from Guest at ::1 - POST /api/v1/orgAdmin/create_form - 2024-09-10T09:31:31.260Z - Error: User doesn't exist anymore
+2024-09-10 12:34:18 [ERROR]: Error in request from Guest at ::1 - POST /api/v1/orgAdmin/update-form/1 - 2024-09-10T09:34:18.486Z - Error: Can't find /api/v1/orgAdmin/update-form/1 on this server
+2024-09-10 12:43:39 [ERROR]: Error in request from Guest at ::1 - POST /api/v1/orgAdmin/update-form/1 - 2024-09-10T09:43:39.728Z - Error: Can't find /api/v1/orgAdmin/update-form/1 on this server
+2024-09-10 12:46:14 [ERROR]: Error in request from undefined at ::1 - PUT /api/v1/orgAdmin/update-form/1 - 2024-09-10T09:46:14.923Z - Error: You don't have permission to perform this action
+2024-09-10 12:59:40 [ERROR]: Error in request from undefined at ::1 - GET /api/v1/orgAdmin/get-forms - 2024-09-10T09:59:40.251Z - Error: You don't have permission to perform this action
+2024-09-10 13:11:30 [ERROR]: Error in request from Guest at ::1 - GET /api/v1/SuperAdmin/get-organizations - 2024-09-10T10:11:30.585Z - Error: User doesn't exist anymore
+2024-09-10 13:13:13 [ERROR]: Error in request from undefined at ::1 - GET /api/v1/SuperAdmin/get-organizations - 2024-09-10T10:13:13.277Z - Error: user is associated to organization using an alias. You've included an alias (creator), but it does not match the alias(es) defined in your association (user).
+2024-09-10 13:13:37 [ERROR]: Error in request from undefined at ::1 - GET /api/v1/SuperAdmin/get-organizations - 2024-09-10T10:13:37.783Z - Error: user is associated to organization using an alias. You've included an alias (createdBy), but it does not match the alias(es) defined in your association (user).
+2024-09-10 13:13:56 [ERROR]: Error in request from undefined at ::1 - GET /api/v1/SuperAdmin/get-organizations - 2024-09-10T10:13:56.894Z - Error: column user.userName does not exist

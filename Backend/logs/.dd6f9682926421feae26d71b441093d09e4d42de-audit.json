@@ -1,0 +1,35 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\.dd6f9682926421feae26d71b441093d09e4d42de-audit.json",
+    "files": [
+        {
+            "date": 1725880260662,
+            "name": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\app-2024-09-09.log",
+            "hash": "05632a1a131fddd496bb8e0a7427cee14453da71717c9345dd551b6d2a5ed67b"
+        },
+        {
+            "date": 1725955468084,
+            "name": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\app-2024-09-10.log",
+            "hash": "4b8696879e32f2848af5b316751fdb08a31ed868c3c8c30f691a6d18d88021b8"
+        },
+        {
+            "date": 1726136536648,
+            "name": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\app-2024-09-12.log",
+            "hash": "53cf1cad106836507f7613f68bbc4b5ec0f86f8ae6ec5a6347f80aa487a0bb8a"
+        },
+        {
+            "date": 1726387991589,
+            "name": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\app-2024-09-15.log",
+            "hash": "e37905caabbb62210c2dd76214c6ef915998eb41b60c12fac6b039cc6154a665"
+        },
+        {
+            "date": 1726460039933,
+            "name": "C:\\Projects\\Node.js\\Platform-x\\Backend\\logs\\app-2024-09-16.log",
+            "hash": "75323934cc9d3d231d252d3f3ffdacc764889a8d515c0a2f7d8c7bae7ec9984a"
+        }
+    ],
+    "hashType": "sha256"
+}
